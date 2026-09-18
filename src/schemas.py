@@ -28,3 +28,12 @@ class ReviewBase(BaseModel):
     user_id: int
     create_date: date
     updated_date: date
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
