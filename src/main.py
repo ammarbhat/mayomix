@@ -3,11 +3,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
-from models import User, TasteEntry, Review
-from schemas import TokenData, Token, UserBase, Classified
+from src.models import User, TasteEntry, Review
+from src.schemas import TokenData, Token, UserBase, Classified
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
-from database import get_db, Base, engine
+from src.database import get_db, Base, engine
 
 app = FastAPI()
 from dotenv import load_dotenv

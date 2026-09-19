@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-engine = create_engine("sql:///data.db")
+engine = create_engine("sqlite:///data.db")
 
 
 class Base(DeclarativeBase):
