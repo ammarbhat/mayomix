@@ -17,8 +17,8 @@ class User(Base):
     pfp_link: Mapped[str | None]
     create_date: Mapped[datetime]
 
-    taste_entries = Mapped[List["TasteEntry"]] = relationship(back_populates="user")
-    reviews = Mapped[List["Review"]] = relationship(back_populates="user")
+    taste_entries: Mapped[List["TasteEntry"]] = relationship(back_populates="user")
+    reviews: Mapped[List["Review"]] = relationship(back_populates="user")
 
 
 class TasteEntry(Base):
@@ -40,8 +40,8 @@ class Review(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     review_str: Mapped[str] = mapped_column(String(400))
     rating: Mapped[int]
-    user_id: Mapped[int] = mapped_column(ForeignKey="user.id")
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     create_date: Mapped[datetime]
     updated_date: Mapped[datetime]
 
-    user = Mapped["User"] = relationship(back_populates="reviews")
+    user: Mapped["User"] = relationship(back_populates="reviews")

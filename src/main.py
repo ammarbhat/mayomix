@@ -103,16 +103,17 @@ def login_for_acess_token(
 
 
 @app.post("/users/")
-def add_user(user: UserBase, pwd=Classified, db=Depends(get_db)):
+def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     check = db.query(User).filter(User.username == user.username).first()
-    if check.username == user.username:
-        return {"message": "username taken"}
+    if check:
+        if check.username == user.username:
+            return {"message": "username taken"}
     new_user = User(
         name=user.name,
         username=user.username,
         bio=user.bio,
         email=user.bio,
-        hash_password=password_hash(pwd.password),
+        hash_password=get_password_hash(pwd.password),
         pfp_link=user.pfp_link,
         create_date=date.today(),
     )
