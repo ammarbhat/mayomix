@@ -10,7 +10,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    uername: Mapped[str]
+    username: Mapped[str]
     bio: Mapped[str | None]
     email: Mapped[str]
     hash_password: Mapped[str]

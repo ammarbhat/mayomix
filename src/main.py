@@ -4,15 +4,16 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from models import User, TasteEntry, Review
-from schemas import TokenData, Token
-from datetime import timedelta, timezone, datetime
+from schemas import TokenData, Token, UserBase, Classified
+from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
-from database import get_db
+from database import get_db, Base, engine
 
 app = FastAPI()
 from dotenv import load_dotenv
 import os
 
+Base.metadata.create_all(bind=engine)
 load_dotenv()
 SECRET_KEY = os.environ["SECRET_KEY"]
 password_hash = PasswordHash.recommended()
@@ -99,3 +100,22 @@ def login_for_acess_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
+
+
+@app.post("/users/")
+def add_user(user: UserBase, pwd=Classified, db=Depends(get_db)):
+    check = db.query(User).filter(User.username == user.username).first()
+    if check.username == user.username:
+        return {"message": "username taken"}
+    new_user = User(
+        name=user.name,
+        username=user.username,
+        bio=user.bio,
+        email=user.bio,
+        hash_password=password_hash(pwd.password),
+        pfp_link=user.pfp_link,
+        create_date=date.today(),
+    )
+    db.add(new_user)
+    db.commit()
+    return {"message": "User added!"}

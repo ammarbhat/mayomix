@@ -5,9 +5,9 @@ from datetime import date
 class UserBase(BaseModel):
     name: str
     username: str
-    bio: str
+    bio: str | None = None
     email: EmailStr
-    pfp_link: str
+    pfp_link: str | None = None
     create_date: date
 
 
