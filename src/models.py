@@ -2,7 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, String
 from src.database import Base
 from typing import List
-from datetime import datetime
+from datetime import datetime, date
 
 
 class User(Base):
@@ -15,7 +15,7 @@ class User(Base):
     email: Mapped[str]
     hash_password: Mapped[str]
     pfp_link: Mapped[str | None]
-    create_date: Mapped[datetime]
+    create_date: Mapped[date]
 
     taste_entries: Mapped[List["TasteEntry"]] = relationship(back_populates="user")
     reviews: Mapped[List["Review"]] = relationship(back_populates="user")
@@ -41,7 +41,7 @@ class Review(Base):
     review_str: Mapped[str] = mapped_column(String(400))
     rating: Mapped[int]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    create_date: Mapped[datetime]
-    updated_date: Mapped[datetime]
+    create_date: Mapped[date]
+    updated_date: Mapped[date]
 
     user: Mapped["User"] = relationship(back_populates="reviews")
