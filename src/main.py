@@ -112,7 +112,7 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
         name=user.name,
         username=user.username,
         bio=user.bio,
-        email=user.bio,
+        email=user.email,
         hash_password=get_password_hash(pwd.password),
         pfp_link=user.pfp_link,
         create_date=date.today(),
@@ -120,3 +120,17 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     db.add(new_user)
     db.commit()
     return {"message": "User added!"}
+
+
+@app.get("/users/{username}", response_model=UserBase)
+def get_user(username: str, db=Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    resp = UserBase(
+        name=user.name,
+        username=user.username,
+        bio=user.bio,
+        email=user.email,
+        pfp_link=user.pfp_link,
+        create_date=user.create_date,
+    )
+    return resp
