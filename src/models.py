@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, JSON
 from src.database import Base
 from typing import List
 from datetime import datetime, date
@@ -16,6 +16,7 @@ class User(Base):
     hash_password: Mapped[str]
     pfp_link: Mapped[str | None]
     create_date: Mapped[date]
+    fav_genres: Mapped[list] = mapped_column(JSON)
 
     taste_entries: Mapped[List["TasteEntry"]] = relationship(back_populates="user")
     reviews: Mapped[List["Review"]] = relationship(back_populates="user")

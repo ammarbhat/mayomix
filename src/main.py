@@ -8,6 +8,8 @@ from src.schemas import TokenData, Token, UserBase, Classified
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
 from src.database import get_db, Base, engine
+import requests
+import httpx
 
 app = FastAPI()
 from dotenv import load_dotenv
@@ -21,6 +23,13 @@ DUMMY_HASH = password_hash.hash("dummypassword")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+url = "https://musicbrainz.org/ws/2/release-group/"
+
+headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+params = {
+    "query": 'artist:radiohead AND releasegroup:"OK Computer"',
+    "fmt": "json",
+}
 
 
 @app.get("/")
@@ -116,6 +125,7 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
         hash_password=get_password_hash(pwd.password),
         pfp_link=user.pfp_link,
         create_date=date.today(),
+        fav_genres=user.fav_genres,
     )
     db.add(new_user)
     db.commit()
@@ -134,3 +144,14 @@ def get_user(username: str, db=Depends(get_db)):
         create_date=user.create_date,
     )
     return resp
+
+
+@app.get("/search/albums")
+async def search_albums_endpoint(query: str, limit: int = 25):
+    url = "https://musicbrainz.org/ws/2/release-group/"
+    params = {"query": query, "fmt": "json", "limit": limit}
+    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params, headers=headers)
+        return response.json()

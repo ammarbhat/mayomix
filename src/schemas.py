@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     email: EmailStr
     pfp_link: str | None = None
     create_date: date
+    fav_genres: list
 
 
 class Classified(BaseModel):
