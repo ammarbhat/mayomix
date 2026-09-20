@@ -23,13 +23,6 @@ DUMMY_HASH = password_hash.hash("dummypassword")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-url = "https://musicbrainz.org/ws/2/release-group/"
-
-headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
-params = {
-    "query": 'artist:radiohead AND releasegroup:"OK Computer"',
-    "fmt": "json",
-}
 
 
 @app.get("/")
