@@ -34,6 +34,14 @@ def verify_password(password, hash):
     return password_hash.verify(password, hash)
 
 
+def genre_tag_string(list):
+    result = ""
+    for l in list:
+        string = f"tag:{l} OR "
+        result += string
+    return result[:-4]
+
+
 def get_password_hash(password):
     return password_hash.hash(password)
 
@@ -140,9 +148,12 @@ def get_user(username: str, db=Depends(get_db)):
 
 
 @app.get("/search/albums")
-async def search_albums_endpoint(query: str, limit: int = 25):
+async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)):
+    test = db.query(User).filter(User.username == "ammar").first()
+    genre_string = genre_tag_string(test.fav_genres)
+    mod_query = f'releasegroup:"{query}" AND ({genre_string})'
     url = "https://musicbrainz.org/ws/2/release-group/"
-    params = {"query": query, "fmt": "json", "limit": limit}
+    params = {"query": mod_query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
 
     async with httpx.AsyncClient() as client:
