@@ -4,7 +4,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from src.models import User, TasteEntry, Review
-from src.schemas import TokenData, Token, UserBase, Classified
+from src.schemas import TokenData, Token, UserBase, Classified, TasteBase
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
 from src.database import get_db, Base, engine
@@ -134,7 +134,7 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
 
 
 @app.get("/users/{username}", response_model=UserBase)
-def get_user_indb(username: str, db=Depends(get_db)):
+def get_user_ep(username: str, db=Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     resp = UserBase(
         name=user.name,
@@ -164,6 +164,17 @@ async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)
 
 @app.post("/taste/")
 def add_taste_entry(
-    current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+    entry: TasteBase,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
 ):
-    return current
+    user = db.query(User).filter(User.username == current.username).first()
+    taste = TasteEntry(
+        mbid=entry.mbid,
+        category=entry.category,
+        rank=entry.rank,
+        user_id=user.id,
+        liked=entry.liked,
+    )
+    db.add(taste)
+    db.commit()

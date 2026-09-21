@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date
+from typing import Literal
 
 
 class UserBase(BaseModel):
@@ -21,6 +22,7 @@ class TasteBase(BaseModel):
     rank: int
     user_id: int
     liked: bool
+    category: Literal["top_songs", "top_albums", "top_artists", "top_genres"]
 
 
 class ReviewBase(BaseModel):
