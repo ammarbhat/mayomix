@@ -178,3 +178,19 @@ def add_taste_entry(
     )
     db.add(taste)
     db.commit()
+    return {"message": "Note added"}
+
+
+@app.delete("/taste/{id}")
+def del_taste_entry(
+    id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+    taste_entry = db.query(TasteEntry).filter(TasteEntry.id == id).first()
+    user = db.query(User).filter(User.username == current.username).first()
+    if not taste_entry:
+        raise HTTPException(status_code=404, detail="Not found")
+    if not user:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    db.delete(taste_entry)
+    db.commit()
+    return {"message": "Note deleted"}
