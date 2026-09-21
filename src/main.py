@@ -74,7 +74,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-def get_current_user(db, token: Annotated[str, Depends(oauth2_scheme)]):
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db=Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -98,7 +98,7 @@ def get_current_user(db, token: Annotated[str, Depends(oauth2_scheme)]):
 def login_for_acess_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db=Depends(get_db)
 ) -> Token:
-    user = authenticate_user(db)
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -134,7 +134,7 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
 
 
 @app.get("/users/{username}", response_model=UserBase)
-def get_user(username: str, db=Depends(get_db)):
+def get_user_indb(username: str, db=Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     resp = UserBase(
         name=user.name,
@@ -143,6 +143,7 @@ def get_user(username: str, db=Depends(get_db)):
         email=user.email,
         pfp_link=user.pfp_link,
         create_date=user.create_date,
+        fav_genres=user.fav_genres,
     )
     return resp
 
@@ -151,7 +152,7 @@ def get_user(username: str, db=Depends(get_db)):
 async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)):
     test = db.query(User).filter(User.username == "ammar").first()
     genre_string = genre_tag_string(test.fav_genres)
-    mod_query = f'releasegroup:"{query}" AND ({genre_string})'
+    mod_query = f'releasegroup:"{query}" AND ({genre_string}) AND primarytype:album'
     url = "https://musicbrainz.org/ws/2/release-group/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
@@ -159,3 +160,10 @@ async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params, headers=headers)
         return response.json()
+
+
+@app.post("/taste/")
+def add_taste_entry(
+    current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+    return current
