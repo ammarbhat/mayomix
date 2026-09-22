@@ -14,6 +14,7 @@ from src.schemas import (
     CategorySelect,
     EditTaste,
     ReviewBase,
+    EditReview,
 )
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
@@ -344,3 +345,39 @@ def get_reviews_by_album(album_mbid: str, db=Depends(get_db)):
     if not reviews:
         raise HTTPException(status_code=404, detail="Not found")
     return reviews
+
+
+@app.put("/users/me/reviews/{review_id}")
+def edit_review(
+    review_id: int,
+    edit: EditReview,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    review = db.query(Review).filter(Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Not found")
+    if current.id != review.user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
+    review.review_str = edit.review_str
+    review.rating = edit.rating
+    review.updated_date = date.today()
+    db.commit()
+    return {"message": "Review edited"}
+
+
+@app.delete("users/me/reviews/{review_id}")
+def delete_review(
+    review_id: int,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    review = db.query(Review).filter(Review.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Not found")
+    if current.id != review.user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    db.delete(review)
+    db.commit()
+    return {"message": "Review deleted"}

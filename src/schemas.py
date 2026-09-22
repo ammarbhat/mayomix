@@ -41,7 +41,6 @@ class ReviewBase(BaseModel):
     rating: int = Field(lt=11)
     user_id: int
     create_date: date
-    updated_date: date
 
 
 class Token(BaseModel):
@@ -60,9 +59,7 @@ class CategorySelect(str, Enum):
     top_genres = "top_genres"
 
 
-class ReviewBase(BaseModel):
+class EditReview(BaseModel):
     review_str: str
-    mbid: str
-    rating: int
-    user_id: int
-    create_date: date
+    rating: int = Field(lt=11)
+    updated_date: date
