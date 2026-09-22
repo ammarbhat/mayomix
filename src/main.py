@@ -16,6 +16,7 @@ from src.schemas import (
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
 from src.database import get_db, Base, engine
+from sqlalchemy.exc import IntegrityError
 import requests
 import httpx
 
@@ -217,22 +218,29 @@ async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)
 @app.post("/users/me/taste/")
 def add_taste_entry(
     entry: TasteBase,
+    category: CategorySelect,
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
     taste = TasteEntry(
         mbid=entry.mbid,
-        category=entry.category,
+        category=category,
         rank=entry.rank,
         user_id=current.id,
         liked=entry.liked,
     )
-    db.add(taste)
-    db.commit()
+    try:
+        db.add(taste)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Rank already taken"
+        )
     return {"message": "Entry added"}
 
 
-@app.delete("/users/taste/{id}")
+@app.delete("/users/me/taste/{id}")
 def del_taste_entry(
     id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):

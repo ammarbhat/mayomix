@@ -30,7 +30,6 @@ class TasteBase(BaseModel):
     mbid: str
     rank: int
     liked: bool
-    category: Literal["top_songs", "top_albums", "top_artists", "top_genres"]
 
 
 class ReviewBase(BaseModel):

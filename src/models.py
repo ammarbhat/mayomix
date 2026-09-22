@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, JSON
+from sqlalchemy import ForeignKey, String, JSON, UniqueConstraint
 from src.database import Base
 from typing import List
 from datetime import datetime, date
@@ -24,6 +24,7 @@ class User(Base):
 
 class TasteEntry(Base):
     __tablename__ = "taste_entry"
+    __table_args__ = (UniqueConstraint("rank", name="uq_rank"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     mbid: Mapped[str]
