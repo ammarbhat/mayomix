@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, JSON, UniqueConstraint
+from sqlalchemy import ForeignKey, String, JSON, UniqueConstraint, CheckConstraint
 from src.database import Base
 from typing import List
 from datetime import datetime, date
@@ -24,7 +24,10 @@ class User(Base):
 
 class TasteEntry(Base):
     __tablename__ = "taste_entry"
-    __table_args__ = (UniqueConstraint("rank", name="uq_rank"),)
+    __table_args__ = (
+        UniqueConstraint("rank", "mbid", name="uq_rank_mbid"),
+        CheckConstraint("rank > 0", name="non_zero_rank"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     mbid: Mapped[str]
@@ -38,12 +41,17 @@ class TasteEntry(Base):
 
 class Review(Base):
     __tablename__ = "review"
+    __table_args__ = (
+        UniqueConstraint("mbid", name="uq_mbid"),
+        CheckConstraint("rating <= 10", name="rating_limit"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     review_str: Mapped[str] = mapped_column(String(400))
+    mbid: Mapped[str]
     rating: Mapped[int]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     create_date: Mapped[date]
-    updated_date: Mapped[date]
+    updated_date: Mapped[date | None]
 
     user: Mapped["User"] = relationship(back_populates="reviews")

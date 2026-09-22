@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date
 from typing import Literal
 from enum import Enum
@@ -28,13 +28,17 @@ class Classified(BaseModel):
 
 class TasteBase(BaseModel):
     mbid: str
-    rank: int
-    liked: bool
+    rank: int = Field(ge=0)
+    liked: bool = False
+
+
+class EditTaste(TasteBase):
+    pass
 
 
 class ReviewBase(BaseModel):
     review_str: str
-    rating: int
+    rating: int = Field(lt=11)
     user_id: int
     create_date: date
     updated_date: date
@@ -54,3 +58,11 @@ class CategorySelect(str, Enum):
     top_albums = "top_albums"
     top_artists = "top_artists"
     top_genres = "top_genres"
+
+
+class ReviewBase(BaseModel):
+    review_str: str
+    mbid: str
+    rating: int
+    user_id: int
+    create_date: date

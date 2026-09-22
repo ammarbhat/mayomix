@@ -12,6 +12,8 @@ from src.schemas import (
     TasteBase,
     EditBase,
     CategorySelect,
+    EditTaste,
+    ReviewBase,
 )
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
@@ -270,3 +272,42 @@ def get_user_entry(user_id: int, category: CategorySelect, db=Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND, detail="No entries found"
         )
     return taste_entries
+
+
+@app.put("/users/me/taste/{entry_id}")
+def edit_entry(
+    edits: EditTaste,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    entry = db.query(TasteEntry).filter(TasteEntry.user_id == current.id).first()
+    if not entry:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    entry.mbid = edits.mbid
+    entry.rank = edits.rank
+    entry.liked = edits.liked
+    db.commit()
+    return {"message": "Note edited"}
+
+
+@app.post("/users/me/reviews")
+def add_review(
+    review: ReviewBase,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    new_review = Review(
+        review_str=review.review_str,
+        rating=review.rating,
+        user_id=current.id,
+        mbid=review.mbid,
+        create_date=date.today(),
+    )
+    try:
+        db.add(new_review)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Review already exists"
+        )
+    return {"message": "Review added"}
