@@ -296,6 +296,15 @@ def add_review(
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
+    test = (
+        db.query(Review)
+        .filter(Review.mbid == review.mbid, Review.user_id == current.id)
+        .first()
+    )
+    if test:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Review already exists"
+        )
     new_review = Review(
         review_str=review.review_str,
         rating=review.rating,
@@ -311,3 +320,27 @@ def add_review(
             status_code=status.HTTP_403_FORBIDDEN, detail="Review already exists"
         )
     return {"message": "Review added"}
+
+
+@app.get("/users/{user_id}/reviews")
+def get_all_reviews(user_id: int, db=Depends(get_db)):
+    reviews = db.query(Review).filter(Review.user_id == user_id).all()
+    if not reviews:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    return reviews
+
+
+@app.get("/reviews/{review_id}")
+def get_review_by_id(reveiw_id: int, db=Depends(get_db)):
+    review = db.query(Review).filter(Review.id == reveiw_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Not found")
+    return review
+
+
+@app.get("/albums/{album_mbid}/reviews")
+def get_reviews_by_album(album_mbid: str, db=Depends(get_db)):
+    reviews = db.query(Review).filter(Review.mbid == album_mbid).all()
+    if not reviews:
+        raise HTTPException(status_code=404, detail="Not found")
+    return reviews

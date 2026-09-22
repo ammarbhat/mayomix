@@ -41,10 +41,7 @@ class TasteEntry(Base):
 
 class Review(Base):
     __tablename__ = "review"
-    __table_args__ = (
-        UniqueConstraint("mbid", name="uq_mbid"),
-        CheckConstraint("rating <= 10", name="rating_limit"),
-    )
+    __table_args__ = (CheckConstraint("rating <= 10", name="rating_limit"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     review_str: Mapped[str] = mapped_column(String(400))
