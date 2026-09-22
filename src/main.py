@@ -4,7 +4,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from src.models import User, TasteEntry, Review
-from src.schemas import TokenData, Token, UserBase, Classified, TasteBase
+from src.schemas import TokenData, Token, UserBase, Classified, TasteBase, EditBase
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
 from src.database import get_db, Base, engine
@@ -146,6 +146,36 @@ def get_user_ep(username: str, db=Depends(get_db)):
         fav_genres=user.fav_genres,
     )
     return resp
+
+
+@app.put("/users/{id}")
+def edit_user(edits: EditBase, id: int, db=Depends(get_db)):
+    user = db.query(User).filter(User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.name = edits.name
+    user.username = edits.username
+    user.bio = edits.bio
+    user.pfp_link = edits.pfp_link
+    user.fav_genres = edits.fav_genres
+    db.commit()
+    return {"message": "Edits saved"}
+
+
+@app.delete("/users/{id}")
+def delete_user(
+    id: int,
+    current: Annotated[User, Depends(get_current_user)],
+    pwd: Classified,
+    db=Depends(get_db),
+):
+    if id != current.id:
+        raise HTTPException(status_code=404, detail="Not found")
+    if not verify_password(pwd.password, current.hash_password):
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    db.delete(current)
+    db.commit()
+    return {"message": "User deleted"}
 
 
 @app.get("/search/albums")

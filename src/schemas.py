@@ -13,6 +13,14 @@ class UserBase(BaseModel):
     fav_genres: list
 
 
+class EditBase(BaseModel):
+    name: str
+    username: str
+    bio: str
+    pfp_link: str
+    fav_genres: list
+
+
 class Classified(BaseModel):
     password: str
 
