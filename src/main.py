@@ -133,6 +133,20 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     return {"message": "User added!"}
 
 
+@app.get("/users/me")
+def get_me(current: Annotated[User, Depends(get_current_user)]):
+    user = UserBase(
+        name=current.name,
+        username=current.username,
+        bio=current.bio,
+        email=current.email,
+        pfp_link=current.pfp_link,
+        create_date=current.create_date,
+        fav_genres=current.fav_genres,
+    )
+    return user
+
+
 @app.get("/users/{username}", response_model=UserBase)
 def get_user_ep(username: str, db=Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
