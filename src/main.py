@@ -4,7 +4,15 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from src.models import User, TasteEntry, Review
-from src.schemas import TokenData, Token, UserBase, Classified, TasteBase, EditBase
+from src.schemas import (
+    TokenData,
+    Token,
+    UserBase,
+    Classified,
+    TasteBase,
+    EditBase,
+    CategorySelect,
+)
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
 from src.database import get_db, Base, engine
@@ -148,7 +156,7 @@ def get_me(current: Annotated[User, Depends(get_current_user)]):
 
 
 @app.get("/users/{username}", response_model=UserBase)
-def get_user_ep(username: str, db=Depends(get_db)):
+def get_user_by_username(username: str, db=Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     resp = UserBase(
         name=user.name,
@@ -206,26 +214,25 @@ async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)
         return response.json()
 
 
-@app.post("/taste/")
+@app.post("/users/me/taste/")
 def add_taste_entry(
     entry: TasteBase,
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
-    user = db.query(User).filter(User.username == current.username).first()
     taste = TasteEntry(
         mbid=entry.mbid,
         category=entry.category,
         rank=entry.rank,
-        user_id=user.id,
+        user_id=current.id,
         liked=entry.liked,
     )
     db.add(taste)
     db.commit()
-    return {"message": "Note added"}
+    return {"message": "Entry added"}
 
 
-@app.delete("/taste/{id}")
+@app.delete("/users/taste/{id}")
 def del_taste_entry(
     id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
@@ -238,3 +245,20 @@ def del_taste_entry(
     db.delete(taste_entry)
     db.commit()
     return {"message": "Note deleted"}
+
+
+@app.get("/users/{user_id}/taste")
+def get_user_entry(user_id: int, category: CategorySelect, db=Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Not found")
+    taste_entries = (
+        db.query(TasteEntry)
+        .filter(TasteEntry.category == category, TasteEntry.user_id == user_id)
+        .all()
+    )
+    if not taste_entries:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No entries found"
+        )
+    return taste_entries

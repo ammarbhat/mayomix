@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date
 from typing import Literal
+from enum import Enum
 
 
 class UserBase(BaseModel):
@@ -28,7 +29,6 @@ class Classified(BaseModel):
 class TasteBase(BaseModel):
     mbid: str
     rank: int
-    user_id: int
     liked: bool
     category: Literal["top_songs", "top_albums", "top_artists", "top_genres"]
 
@@ -48,3 +48,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+class CategorySelect(str, Enum):
+    top_songs = "top_songs"
+    top_albums = "top_albums"
+    top_artists = "top_artists"
+    top_genres = "top_genres"
