@@ -205,9 +205,14 @@ def delete_user(
 
 
 @app.get("/search/albums")
-async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)):
-    test = db.query(User).filter(User.username == "ammar").first()
-    genre_string = genre_tag_string(test.fav_genres)
+async def search_albums_endpoint(
+    query: str,
+    current: Annotated[User, Depends(get_current_user)],
+    limit: int = 25,
+    db=Depends(get_db),
+):
+    user = db.query(User).filter(User.username == current.username).first()
+    genre_string = genre_tag_string(user.fav_genres)
     mod_query = f'releasegroup:"{query}" AND ({genre_string}) AND primarytype:album'
     url = "https://musicbrainz.org/ws/2/release-group/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
@@ -215,6 +220,36 @@ async def search_albums_endpoint(query: str, limit: int = 25, db=Depends(get_db)
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params, headers=headers)
+        return response.json()
+
+
+@app.get("/search/artists")
+async def search_artits(query: str, limit: int = 6):
+    url = "https://musicbrainz.org/ws/2/artist/"
+    params = {"query": query, "fmt": "json", "limit": limit}
+    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params, headers=headers)
+        return response.json()
+
+
+@app.get("/search/songs")
+async def search_songs(query: str, limit: int = 10):
+    mod_query = f'recording:"{query}"'
+    url = "https://musicbrainz.org/ws/2/recording/"
+    params = {"query": mod_query, "fmt": "json", "limit": limit}
+    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params, headers=headers)
+        return response.json()
+
+
+@app.get("/albums/{mbid}")
+async def get_album(mbid: str):
+    url = f"https://musicbrainz.org/ws/2/release-group/{mbid}?inc=genres+releases&fmt=json"
+    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
         return response.json()
 
 
@@ -439,7 +474,7 @@ def delete_req_friend(con_id: int, db=Depends(get_db)):
 
 
 @app.get("/connections/me")
-def get_connectons(
+def get_connections(
     current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
     connect1 = (
@@ -482,3 +517,32 @@ def get_sent_connections(
     if not connect:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     return connect
+
+
+@app.get("/activity")
+def get_activity(
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    connections = (
+        db.query(Connection)
+        .filter(
+            ((Connection.user_id1 == current.id) | (Connection.user_id2 == current.id)),
+            Connection.accepted == True,
+        )
+        .all()
+    )
+
+    ids = {current.id}
+    for c in connections:
+        ids.add(c.user_id1)
+        ids.add(c.user_id2)
+
+    activity = (
+        db.query(Review)
+        .filter(Review.user_id.in_(ids))
+        .order_by(Review.date_created.desc())
+        .limit(7)
+        .all()
+    )
+    return activity
