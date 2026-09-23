@@ -385,7 +385,9 @@ def delete_review(
 
 @app.post("/connections/{user_id}")
 def send_connection(
-    user_id: int, current: Annotated[User, Depends(get_db)], db=Depends(get_db)
+    user_id: int,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
 ):
     con1 = (
         db.query(Connection)
@@ -434,3 +436,49 @@ def delete_req_friend(con_id: int, db=Depends(get_db)):
     db.delete(connect)
     db.commit()
     return {"message": "Connection deleted"}
+
+
+@app.get("/connections/me")
+def get_connectons(
+    current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+    connect1 = (
+        db.query(Connection)
+        .filter(Connection.user_id1 == current.id, Connection.accepted == True)
+        .all()
+    )
+    connect2 = (
+        db.query(Connection)
+        .filter(Connection.user_id2 == current.id, Connection.accepted == True)
+        .all()
+    )
+    respli = connect1 + connect2
+    return respli
+
+
+@app.get("/connections/me/pending")
+def get_pending_connections(
+    current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+    connect = (
+        db.query(Connection)
+        .filter(Connection.user_id2 == current.id, Connection.accepted == False)
+        .all()
+    )
+    if not connect:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    return connect
+
+
+@app.get("/connections/me/sent")
+def get_sent_connections(
+    current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+    connect = (
+        db.query(Connection)
+        .filter(Connection.user_id1 == current.id, Connection.accepted == False)
+        .all()
+    )
+    if not connect:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    return connect
