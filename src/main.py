@@ -42,6 +42,28 @@ def root():
     return {"message": "Welcome to root!"}
 
 
+def select_best_release(release_group: dict) -> str | None:
+    releases = release_group.get("releases", [])
+
+    if not releases:
+        return None
+
+    group_title = release_group.get("title", "")
+
+    official = [r for r in releases if r.get("status") == "Official"]
+
+    candidates = official if official else releases
+
+    exact_title_matches = [r for r in candidates if r.get("title") == group_title]
+
+    if exact_title_matches:
+        candidates = exact_title_matches
+
+    candidates = sorted(candidates, key=lambda r: r.get("date") or "9999-99-99")
+
+    return candidates[0].get("id")
+
+
 def verify_password(password, hash):
     return password_hash.verify(password, hash)
 
@@ -246,11 +268,33 @@ async def search_songs(query: str, limit: int = 10):
 
 @app.get("/albums/{mbid}")
 async def get_album(mbid: str):
-    url = f"https://musicbrainz.org/ws/2/release-group/{mbid}?inc=genres+releases&fmt=json"
+    url = (
+        f"https://musicbrainz.org/ws/2/release-group/"
+        f"{mbid}?inc=genres+releases&fmt=json"
+    )
+
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
-    async with httpx.AsyncClient() as client:
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
         response = await client.get(url, headers=headers)
-        return response.json()
+
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Failed to fetch album from MusicBrainz",
+            )
+
+        album_meta = response.json()
+
+        # Use the release-group MBID directly
+        cover_url = f"https://coverartarchive.org/" f"release-group/{mbid}/front"
+
+        cover_response = await client.head(cover_url)
+
+        if cover_response.status_code == 404:
+            cover_url = None
+
+    return {"meta": album_meta, "cover_url": cover_url}
 
 
 @app.post("/users/me/taste/")
