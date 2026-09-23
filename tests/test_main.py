@@ -49,3 +49,8 @@ def test_db():
     db.query(Review).delete()
     db.commit()
     db.close()
+
+
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200

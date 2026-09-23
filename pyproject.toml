@@ -5,6 +5,7 @@ requires-python = ">=3.14"
 dependencies = [
     "fastapi[standard]>=0.141.1",
     "httpx>=0.28.1",
+    "httpx2>=2.13.1",
     "pwdlib[argon2]>=0.3.1",
     "pydantic>=2.13.5",
     "pyjwt>=2.14.0",
@@ -15,3 +16,5 @@ dependencies = [
 ]
 [tool.fastapi]
 entrypoint = "src.main:app"
+[tool.pytest.ini_options]
+pythonpath = ["."]
