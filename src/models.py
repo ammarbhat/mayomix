@@ -55,3 +55,13 @@ class Review(Base):
     updated_date: Mapped[date | None]
 
     user: Mapped["User"] = relationship(back_populates="reviews")
+
+
+class Connection(Base):
+    __tablename__ = "connection"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id1: Mapped[int]
+    user_id2: Mapped[int]
+    accepted: Mapped[bool]
+    connect_date: Mapped[date | None]

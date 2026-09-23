@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
-from src.models import User, TasteEntry, Review
+from src.models import User, TasteEntry, Review, Connection
 from src.schemas import (
     TokenData,
     Token,
@@ -174,7 +174,7 @@ def get_user_by_username(username: str, db=Depends(get_db)):
     return resp
 
 
-@app.put("/users/{id}")
+@app.patch("/users/{id}")
 def edit_user(edits: EditBase, id: int, db=Depends(get_db)):
     user = db.query(User).filter(User.id == id).first()
     if not user:
@@ -275,7 +275,7 @@ def get_user_entry(user_id: int, category: CategorySelect, db=Depends(get_db)):
     return taste_entries
 
 
-@app.put("/users/me/taste/{entry_id}")
+@app.patch("/users/me/taste/{entry_id}")
 def edit_entry(
     edits: EditTaste,
     current: Annotated[User, Depends(get_current_user)],
@@ -347,7 +347,7 @@ def get_reviews_by_album(album_mbid: str, db=Depends(get_db)):
     return reviews
 
 
-@app.put("/users/me/reviews/{review_id}")
+@app.patch("/users/me/reviews/{review_id}")
 def edit_review(
     review_id: int,
     edit: EditReview,
@@ -381,3 +381,56 @@ def delete_review(
     db.delete(review)
     db.commit()
     return {"message": "Review deleted"}
+
+
+@app.post("/connections/{user_id}")
+def send_connection(
+    user_id: int, current: Annotated[User, Depends(get_db)], db=Depends(get_db)
+):
+    con1 = (
+        db.query(Connection)
+        .filter(Connection.user_id1 == current.id, Connection.user_id2 == user_id)
+        .first()
+    )
+    con2 = (
+        db.query(Connection)
+        .filter(Connection.user_id1 == user_id, Connection.user_id2 == current.id)
+        .first()
+    )
+    if con1 or con2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Connection already exists"
+        )
+    new_con = Connection(user_id1=current.id, user_id2=user_id)
+    reciever = db.query(User).filter(User.id == user_id).first()
+    if not reciever:
+        raise HTTPException(status_code=404, detail="Not found")
+    db.add(new_con)
+    db.commit()
+    return {"message": "Connection request sent"}
+
+
+@app.patch("/connections/{con_id}/accept")
+def accept_connection(
+    con_id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+
+    connect = db.query(Connection).filter(Connection.id == con_id).first()
+    if current.id != connect.user_id1:
+        raise HTTPException(status_code=400, detail="Unauthorized")
+    if not connect:
+        raise HTTPException(status_code=404, detail="Not found")
+    connect.accepted = True
+    connect.connect_date = date.today()
+    db.commit()
+    return {"message": "Connection accepted"}
+
+
+@app.delete("/connections/{con_id}/delete")
+def delete_req_friend(con_id: int, db=Depends(get_db)):
+    connect = db.query(Connection).filter(Connection.id == con_id).first()
+    if not connect:
+        raise HTTPException(status_code=404, detail="Not found")
+    db.delete(connect)
+    db.commit()
+    return {"message": "Connection deleted"}
