@@ -163,7 +163,7 @@ def test_edit_user(test_db):
         f"/users/{test_user.id}",
         json={
             "name": "string",
-            "username": "string",
+            "username": "stringaasda",
             "bio": "string",
             "pfp_link": "string",
             "fav_genres": ["string"],
@@ -186,7 +186,7 @@ def test_edit_user_not_found():
     assert response.status_code == 404
 
 
-def test_edit_user(test_db):
+def test_edit_user_duplicate_username(test_db):
     response = client.patch(
         f"/users/{1}",
         json={
@@ -198,3 +198,25 @@ def test_edit_user(test_db):
         },
     )
     assert response.status_code == 403
+
+
+def test_edit_bio(test_db):
+    user = test_db.query(User).filter(User.id == 1).first()
+    response = client.patch(
+        f"/users/{1}",
+        json={
+            "bio": "blah blah",
+        },
+    )
+    test_db.refresh(user)
+
+    assert response.status_code == 200
+    assert user.username == "testusr"
+
+
+def test_edit_user_empty():
+    response = client.patch(
+        f"/users/{1}",
+        json={},
+    )
+    assert response.status_code == 200

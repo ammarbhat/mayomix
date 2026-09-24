@@ -211,11 +211,11 @@ def edit_user(edits: EditBase, id: int, db=Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     if test_user:
         raise HTTPException(status_code=403, detail="username already taken")
-    user.name = edits.name
-    user.username = edits.username
-    user.bio = edits.bio
-    user.pfp_link = edits.pfp_link
-    user.fav_genres = edits.fav_genres
+
+    updates = edits.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(user, field, value)
+
     db.commit()
     return {"message": "Edits saved"}
 

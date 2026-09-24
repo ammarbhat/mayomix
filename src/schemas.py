@@ -15,11 +15,11 @@ class UserBase(BaseModel):
 
 
 class EditBase(BaseModel):
-    name: str
-    username: str
-    bio: str
-    pfp_link: str
-    fav_genres: list
+    name: str = None
+    username: str = None
+    bio: str = None
+    pfp_link: str = None
+    fav_genres: list = None
 
 
 class Classified(BaseModel):
