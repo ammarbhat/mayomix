@@ -187,6 +187,10 @@ def get_me(current: Annotated[User, Depends(get_current_user)]):
 @app.get("/users/{username}", response_model=UserBase)
 def get_user_by_username(username: str, db=Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="user not found"
+        )
     resp = UserBase(
         name=user.name,
         username=user.username,

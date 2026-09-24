@@ -133,3 +133,13 @@ def test_add_user_incomplete_data(test_db):
 def test_get_me(seed_test_user):
     response = client.get("/users/me")
     assert response.status_code == 200
+
+
+def test_get_user_by_username():
+    response = client.get(f"/users/{"anythingss"}")
+    assert response.status_code == 200
+
+
+def test_get_user_by_username_not_found():
+    response = client.get(f"/users/{"thanosablls"}")
+    assert response.status_code == 404
