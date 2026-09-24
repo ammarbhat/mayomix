@@ -206,8 +206,11 @@ def get_user_by_username(username: str, db=Depends(get_db)):
 @app.patch("/users/{id}")
 def edit_user(edits: EditBase, id: int, db=Depends(get_db)):
     user = db.query(User).filter(User.id == id).first()
+    test_user = db.query(User).filter(User.username == edits.username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if test_user:
+        raise HTTPException(status_code=403, detail="username already taken")
     user.name = edits.name
     user.username = edits.username
     user.bio = edits.bio

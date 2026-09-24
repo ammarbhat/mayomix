@@ -30,7 +30,7 @@ def override_get_current_user():
     return User(
         id=1,
         name="amm",
-        username="anythingss",
+        username="testusrs",
         email="test@test.com",
         hash_password="fake",
         create_date=date.today(),
@@ -57,7 +57,7 @@ def seed_test_user():
     db = TestingSession()
     user = User(
         name="amm",
-        username="anythingss",
+        username="testusr",
         email="test@test.com",
         hash_password="fake",
         create_date=date.today(),
@@ -99,7 +99,7 @@ def test_add_user_duplicate_username(test_db):
         json={
             "user": {
                 "name": "string",
-                "username": "anythingss",
+                "username": "testusr",
                 "bio": "string",
                 "email": "user@example.com",
                 "pfp_link": "string",
@@ -136,10 +136,65 @@ def test_get_me(seed_test_user):
 
 
 def test_get_user_by_username():
-    response = client.get(f"/users/{"anythingss"}")
+    response = client.get(f"/users/{"testusr"}")
     assert response.status_code == 200
 
 
 def test_get_user_by_username_not_found():
     response = client.get(f"/users/{"thanosablls"}")
     assert response.status_code == 404
+
+
+def test_edit_user(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+
+    response = client.patch(
+        f"/users/{test_user.id}",
+        json={
+            "name": "string",
+            "username": "string",
+            "bio": "string",
+            "pfp_link": "string",
+            "fav_genres": ["string"],
+        },
+    )
+    assert response.status_code == 200
+
+
+def test_edit_user_not_found():
+    response = client.patch(
+        f"/users/{999}",
+        json={
+            "name": "string",
+            "username": "string",
+            "bio": "string",
+            "pfp_link": "string",
+            "fav_genres": ["string"],
+        },
+    )
+    assert response.status_code == 404
+
+
+def test_edit_user(test_db):
+    response = client.patch(
+        f"/users/{1}",
+        json={
+            "name": "string",
+            "username": "testusr",
+            "bio": "string",
+            "pfp_link": "string",
+            "fav_genres": ["string"],
+        },
+    )
+    assert response.status_code == 403

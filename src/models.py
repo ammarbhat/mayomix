@@ -7,6 +7,7 @@ from datetime import datetime, date
 
 class User(Base):
     __tablename__ = "user"
+    # __table_args__ = (UniqueConstraint("username", name="uq_username"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
