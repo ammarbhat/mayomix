@@ -29,6 +29,7 @@ def override_get_db():
 def override_get_current_user():
     return User(
         id=1,
+        name="amm",
         username="anythingss",
         email="test@test.com",
         hash_password="fake",
@@ -47,6 +48,22 @@ def test_db():
     yield db
     db.query(TasteEntry).delete()
     db.query(Review).delete()
+    db.commit()
+    db.close()
+
+
+@pytest.fixture(autouse=True)
+def seed_test_user():
+    db = TestingSession()
+    user = User(
+        name="amm",
+        username="anythingss",
+        email="test@test.com",
+        hash_password="fake",
+        create_date=date.today(),
+        fav_genres=["pop", "rock"],
+    )
+    db.add(user)
     db.commit()
     db.close()
 
@@ -76,24 +93,13 @@ def test_add_users(test_db):
 
 
 def test_add_user_duplicate_username(test_db):
-    test_user = User(
-        name="test",
-        username="anythings",
-        bio="heyyy",
-        email="test@mail.com",
-        hash_password="blahblah",
-        create_date=date.today(),
-        fav_genres=["rock"],
-    )
-    test_db.add(test_user)
-    test_db.commit()
-    test_db.refresh(test_user)
+
     response = client.post(
         "/users/",
         json={
             "user": {
                 "name": "string",
-                "username": "anythings",
+                "username": "anythingss",
                 "bio": "string",
                 "email": "user@example.com",
                 "pfp_link": "string",
@@ -122,3 +128,8 @@ def test_add_user_incomplete_data(test_db):
         },
     )
     assert response.status_code == 422
+
+
+def test_get_me(seed_test_user):
+    response = client.get("/users/me")
+    assert response.status_code == 200
