@@ -151,7 +151,10 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     check = db.query(User).filter(User.username == user.username).first()
     if check:
         if check.username == user.username:
-            return {"message": "username taken"}
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="username already exists",
+            )
     new_user = User(
         name=user.name,
         username=user.username,

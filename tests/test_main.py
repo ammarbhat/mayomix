@@ -54,3 +54,71 @@ def test_db():
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
+
+
+def test_add_users(test_db):
+    response = client.post(
+        "/users/",
+        json={
+            "user": {
+                "name": "string",
+                "username": "string",
+                "bio": "string",
+                "email": "user@example.com",
+                "pfp_link": "string",
+                "create_date": "2026-09-24",
+                "fav_genres": ["string"],
+            },
+            "pwd": {"password": "string"},
+        },
+    )
+    assert response.status_code == 200
+
+
+def test_add_user_duplicate_username(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    response = client.post(
+        "/users/",
+        json={
+            "user": {
+                "name": "string",
+                "username": "anythings",
+                "bio": "string",
+                "email": "user@example.com",
+                "pfp_link": "string",
+                "create_date": "2026-09-24",
+                "fav_genres": ["string"],
+            },
+            "pwd": {"password": "string"},
+        },
+    )
+    assert response.status_code == 400
+
+
+def test_add_user_incomplete_data(test_db):
+    response = client.post(
+        "/users/",
+        json={
+            "user": {
+                "name": "string",
+                "username": "string",
+                "bio": "string",
+                "pfp_link": "string",
+                "create_date": "2026-09-24",
+                "fav_genres": ["string"],
+            },
+            "pwd": {"password": "string"},
+        },
+    )
+    assert response.status_code == 422
