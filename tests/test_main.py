@@ -8,6 +8,7 @@ from src.models import TasteEntry, User, Review, Connection
 from datetime import date
 from sqlalchemy.pool import StaticPool
 from pwdlib import PasswordHash
+from fastapi.security import OAuth2PasswordRequestForm
 
 password_hash = PasswordHash.recommended()
 
@@ -81,6 +82,20 @@ def test_root():
     assert response.status_code == 200
 
 
+def test_token():
+    response = client.post(
+        "/token", data={"username": "testusr", "password": "string", "scope": ""}
+    )
+    assert response.status_code == 200
+
+
+def test_token_unauthorized():
+    response = client.post(
+        "/token", data={"username": "testusssr", "password": "string", "scope": ""}
+    )
+    assert response.status_code == 401
+
+
 def test_add_users(test_db):
     response = client.post(
         "/users/",
@@ -138,7 +153,7 @@ def test_add_user_incomplete_data(test_db):
     assert response.status_code == 422
 
 
-def test_get_me(seed_test_user):
+def test_get_me():
     response = client.get("/users/me")
     assert response.status_code == 200
 
@@ -224,7 +239,7 @@ def test_edit_bio(test_db):
 
 def test_edit_user_empty(test_db):
     user = test_db.query(User).filter(User.id == 1).first()
-
+    test_db.refresh(user)
     response = client.patch(
         f"/users/{1}",
         json={},
@@ -243,12 +258,15 @@ def test_delete_user(test_db):
 
 
 def test_delete_user_not_found(test_db):
-
     response = client.request("DELETE", f"/users/{9797}", json={"password": "string"})
     assert response.status_code == 404
 
 
 def test_delete_user_incorrect_password(test_db):
-
     response = client.request("DELETE", f"/users/{1}", json={"password": "strings"})
     assert response.status_code == 401
+
+
+def test_delete_user_incorrect_id():
+    response = client.request("DELETE", f"/users/{999}", json={"password": "strings"})
+    assert response.status_code == 404
