@@ -323,3 +323,19 @@ def test_add_entry_others_limit():
         json={"mbid": "hello", "rank": 4, "liked": False},
     )
     assert response.status_code == 403
+
+
+def test_delete_taste_entry(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.delete(f"/users/me/taste/{entry.id}")
+    assert response.status_code == 200
+
+
+def test_delete_entry_not_found():
+    response = client.delete(f"/users/me/taste/{12}")
+    assert response.status_code == 404
