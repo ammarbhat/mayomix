@@ -404,9 +404,9 @@ def edit_entry(
     entry = db.query(TasteEntry).filter(TasteEntry.user_id == current.id).first()
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-    entry.mbid = edits.mbid
-    entry.rank = edits.rank
-    entry.liked = edits.liked
+    updates = edits.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(entry, field, value)
     db.commit()
     return {"message": "Note edited"}
 

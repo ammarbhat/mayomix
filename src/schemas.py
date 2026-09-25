@@ -15,11 +15,11 @@ class UserBase(BaseModel):
 
 
 class EditBase(BaseModel):
-    name: str = None
-    username: str = None
-    bio: str = None
-    pfp_link: str = None
-    fav_genres: list = None
+    name: str | None = None
+    username: str | None = None
+    bio: str | None = None
+    pfp_link: str | None = None
+    fav_genres: list | None = None
 
 
 class Classified(BaseModel):
@@ -32,8 +32,10 @@ class TasteBase(BaseModel):
     liked: bool = False
 
 
-class EditTaste(TasteBase):
-    pass
+class EditTaste(BaseModel):
+    mbid: str | None = None
+    rank: int | None = None
+    liked: bool | None = None
 
 
 class ReviewBase(BaseModel):

@@ -355,3 +355,54 @@ def test_get_user_entries(test_db):
 def test_get_user_entries_not_found():
     response = client.get(f"/users/{1}/taste?category=top_songs")
     assert response.status_code == 404
+
+
+def test_edit_entry_not_found():
+    response = client.patch(
+        f"/users/me/taste/{1}?category=top_songs",
+        json={"mbid": "strisfsdfsdfng", "rank": 2, "liked": False},
+    )
+    assert response.status_code == 404
+
+
+def test_edit_entry(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={"mbid": "strisfsdfsdfng", "rank": 3, "liked": False},
+    )
+    assert response.status_code == 200
+
+
+def test_edit_entry_one_field(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={"mbid": "strisfsdfsdfng"},
+    )
+    assert response.status_code == 200
+
+
+def test_edit_entry_empty(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={},
+    )
+    assert response.status_code == 200
+    assert entry.mbid == "hello"
