@@ -339,3 +339,19 @@ def test_delete_taste_entry(test_db):
 def test_delete_entry_not_found():
     response = client.delete(f"/users/me/taste/{12}")
     assert response.status_code == 404
+
+
+def test_get_user_entries(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.get(f"/users/{1}/taste?category=top_songs")
+    assert response.status_code == 200
+
+
+def test_get_user_entries_not_found():
+    response = client.get(f"/users/{1}/taste?category=top_songs")
+    assert response.status_code == 404
