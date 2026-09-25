@@ -7,6 +7,9 @@ from src.database import Base, get_db
 from src.models import TasteEntry, User, Review, Connection
 from datetime import date
 from sqlalchemy.pool import StaticPool
+from pwdlib import PasswordHash
+
+password_hash = PasswordHash.recommended()
 
 client = TestClient(app)
 engine = create_engine(
@@ -30,9 +33,9 @@ def override_get_current_user():
     return User(
         id=1,
         name="amm",
-        username="testusrs",
+        username="testusr",
         email="test@test.com",
-        hash_password="fake",
+        hash_password=password_hash.hash("string"),
         create_date=date.today(),
         fav_genres=["pop", "rock"],
     )
@@ -46,26 +49,31 @@ app.dependency_overrides[get_current_user] = override_get_current_user
 def test_db():
     db = TestingSession()
     yield db
-    db.query(TasteEntry).delete()
-    db.query(Review).delete()
-    db.commit()
     db.close()
 
 
 @pytest.fixture(autouse=True)
-def seed_test_user():
+def seed_test_user(setup_and_teardown_db):
     db = TestingSession()
     user = User(
+        id=1,
         name="amm",
         username="testusr",
         email="test@test.com",
-        hash_password="fake",
+        hash_password=password_hash.hash("string"),
         create_date=date.today(),
         fav_genres=["pop", "rock"],
     )
     db.add(user)
     db.commit()
     db.close()
+
+
+@pytest.fixture(autouse=True)
+def setup_and_teardown_db():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
 def test_root():
@@ -146,21 +154,9 @@ def test_get_user_by_username_not_found():
 
 
 def test_edit_user(test_db):
-    test_user = User(
-        name="test",
-        username="anythings",
-        bio="heyyy",
-        email="test@mail.com",
-        hash_password="blahblah",
-        create_date=date.today(),
-        fav_genres=["rock"],
-    )
-    test_db.add(test_user)
-    test_db.commit()
-    test_db.refresh(test_user)
 
     response = client.patch(
-        f"/users/{test_user.id}",
+        f"/users/{1}",
         json={
             "name": "string",
             "username": "stringaasda",
@@ -187,11 +183,23 @@ def test_edit_user_not_found():
 
 
 def test_edit_user_duplicate_username(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
     response = client.patch(
         f"/users/{1}",
         json={
             "name": "string",
-            "username": "testusr",
+            "username": "anythings",
             "bio": "string",
             "pfp_link": "string",
             "fav_genres": ["string"],
@@ -214,9 +222,33 @@ def test_edit_bio(test_db):
     assert user.username == "testusr"
 
 
-def test_edit_user_empty():
+def test_edit_user_empty(test_db):
+    user = test_db.query(User).filter(User.id == 1).first()
+
     response = client.patch(
         f"/users/{1}",
         json={},
     )
     assert response.status_code == 200
+    assert user.username == "testusr"
+
+
+def test_delete_user(test_db):
+    user = test_db.query(User).filter(User.id == 1).first()
+
+    response = client.request(
+        "DELETE", f"/users/{user.id}", json={"password": "string"}
+    )
+    assert response.status_code == 200
+
+
+def test_delete_user_not_found(test_db):
+
+    response = client.request("DELETE", f"/users/{9797}", json={"password": "string"})
+    assert response.status_code == 404
+
+
+def test_delete_user_incorrect_password(test_db):
+
+    response = client.request("DELETE", f"/users/{1}", json={"password": "strings"})
+    assert response.status_code == 401

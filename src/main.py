@@ -231,7 +231,8 @@ def delete_user(
         raise HTTPException(status_code=404, detail="Not found")
     if not verify_password(pwd.password, current.hash_password):
         raise HTTPException(status_code=401, detail="Incorrect password")
-    db.delete(current)
+    user = db.query(User).filter(User.id == current.id).first()
+    db.delete(user)
     db.commit()
     return {"message": "User deleted"}
 
