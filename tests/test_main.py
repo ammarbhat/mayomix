@@ -406,3 +406,80 @@ def test_edit_entry_empty(test_db):
     )
     assert response.status_code == 200
     assert entry.mbid == "hello"
+
+
+def test_add_review():
+    response = client.post(
+        "/users/me/reviews",
+        json={
+            "review_str": "string",
+            "rating": 10,
+            "user_id": 1,
+            "mbid": "str",
+            "create_date": "2026-09-25",
+        },
+    )
+    assert response.status_code == 200
+
+
+def test_add_review_without_mbid():
+    response = client.post(
+        "/users/me/reviews",
+        json={
+            "review_str": "string",
+            "rating": 10,
+            "user_id": 1,
+            "create_date": "2026-09-25",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_add_review_duplicate(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    response = client.post(
+        "/users/me/reviews",
+        json={
+            "review_str": "blah blah",
+            "rating": 7,
+            "mbid": "heyheyhey",
+            "user_id": 1,
+            "create_date": "2026-09-09",
+        },
+    )
+    assert response.status_code == 403
+
+
+def test_add_review_rating_limit():
+    response = client.post(
+        "/users/me/reviews",
+        json={
+            "review_str": "string",
+            "rating": 11,
+            "user_id": 1,
+            "mbid": "str",
+            "create_date": "2026-09-25",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_add_review_invalid():
+    response = client.post(
+        "/users/me/reviews",
+        json={
+            "review_str": "string",
+            "rating": 11,
+            "user_id": 1,
+            "mbid": "str",
+        },
+    )
+    assert response.status_code == 422
