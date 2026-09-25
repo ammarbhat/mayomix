@@ -42,6 +42,18 @@ def root():
     return {"message": "Welcome to root!"}
 
 
+def check_taste_entry(entry, category):
+    if category == "top_songs":
+        if entry.rank > 10:
+            return False
+        else:
+            return True
+    else:
+        if entry.rank > 3:
+            return False
+        return True
+
+
 def select_best_release(release_group: dict) -> str | None:
     releases = release_group.get("releases", [])
 
@@ -146,7 +158,7 @@ def login_for_acess_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@app.post("/users/")
+@app.post("/users")
 def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     check = db.query(User).filter(User.username == user.username).first()
     if check:
@@ -308,13 +320,31 @@ async def get_album(mbid: str):
     return {"meta": album_meta, "cover_url": cover_url}
 
 
-@app.post("/users/me/taste/")
+@app.post("/users/me/taste")
 def add_taste_entry(
     entry: TasteBase,
     category: CategorySelect,
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
+    test = (
+        db.query(TasteEntry)
+        .filter(TasteEntry.mbid == entry.mbid, TasteEntry.category == category)
+        .first()
+    )
+    test2 = (
+        db.query(TasteEntry)
+        .filter(TasteEntry.rank == entry.rank, TasteEntry.category == category)
+        .first()
+    )
+    if test or test2:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="already taken"
+        )
+    if not check_taste_entry(entry, category):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="rank limit reached"
+        )
     taste = TasteEntry(
         mbid=entry.mbid,
         category=category,

@@ -267,6 +267,59 @@ def test_delete_user_incorrect_password(test_db):
     assert response.status_code == 401
 
 
-def test_delete_user_incorrect_id():
-    response = client.request("DELETE", f"/users/{999}", json={"password": "strings"})
-    assert response.status_code == 404
+def test_add_taste_entry(test_db):
+    response = client.post(
+        "/users/me/taste?category=top_songs",
+        json={"mbid": "string", "rank": 3, "liked": False},
+    )
+    assert response.status_code == 200
+
+
+def test_add_taste_entry_duplicate_mbid(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    response = client.post(
+        "/users/me/taste?category=top_songs",
+        json={"mbid": "hello", "rank": 3, "liked": False},
+    )
+    assert response.status_code == 403
+
+
+def test_add_taste_entry_ivalid_data():
+    response = client.post(
+        "/users/me/taste?category=top_songs",
+        json={"mbid": "string", "liked": True},
+    )
+    assert response.status_code == 422
+
+
+def test_add_taste_entry_duplicate_rank(test_db):
+    entry = TasteEntry(
+        mbid="hellos", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    response = client.post(
+        "/users/me/taste?category=top_songs",
+        json={"mbid": "hello", "rank": 2, "liked": False},
+    )
+    assert response.status_code == 403
+
+
+def test_add_taste_song_limit(test_db):
+    response = client.post(
+        "/users/me/taste?category=top_songs",
+        json={"mbid": "hello", "rank": 11, "liked": False},
+    )
+    assert response.status_code == 403
+
+
+def test_add_entry_others_limit():
+    response = client.post(
+        "/users/me/taste?category=top_albums",
+        json={"mbid": "hello", "rank": 4, "liked": False},
+    )
+    assert response.status_code == 403

@@ -27,7 +27,7 @@ class TasteEntry(Base):
     __tablename__ = "taste_entry"
     __table_args__ = (
         UniqueConstraint("rank", "mbid", name="uq_rank_mbid"),
-        CheckConstraint("rank > 0", name="non_zero_rank"),
+        CheckConstraint("rank > 0 AND rank < 11", name="non_zero_rank"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -35,7 +35,7 @@ class TasteEntry(Base):
     category: Mapped[str]
     rank: Mapped[int]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    liked: Mapped[bool | None]
+    liked: Mapped[bool]
 
     user: Mapped["User"] = relationship(back_populates="taste_entries")
 
