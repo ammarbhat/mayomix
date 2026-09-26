@@ -483,6 +483,7 @@ def edit_review(
     updates = edit.model_dump(exclude_unset=True)
     for field, value in updates.items():
         setattr(review, field, value)
+    review.updated_date = date.today()
     db.commit()
     return {"message": "Review edited"}
 

@@ -62,6 +62,6 @@ class CategorySelect(str, Enum):
 
 
 class EditReview(BaseModel):
-    review_str: str
-    rating: int = Field(lt=11)
-    updated_date: date
+    review_str: str | None = None
+    rating: int | None = None
+    updated_date: date | None = None

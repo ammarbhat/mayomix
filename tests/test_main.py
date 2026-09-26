@@ -524,3 +524,65 @@ def test_get_album_reviews(test_db):
 
     response = client.get("/albums/heyheyhey/reviews")
     assert response.status_code == 200
+
+
+def test_edit_review_not_found():
+    response = client.patch(
+        f"/users/me/reviews/{1}",
+        json={"review_str": "string", "rating": 10, "updated_date": "2026-09-26"},
+    )
+    assert response.status_code == 404
+
+
+def test_edit_review_empty(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    test_db.refresh(review)
+    response = client.patch(f"/users/me/reviews/{review.id}", json={})
+    test_db.refresh(review)
+    assert response.status_code == 200
+    assert review.rating == 7
+
+
+def test_edit_review_one_field(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    test_db.refresh(review)
+    response = client.patch(f"/users/me/reviews/{review.id}", json={"rating": 10})
+    test_db.refresh(review)
+    assert response.status_code == 200
+    assert review.rating == 10
+
+
+def test_edit_review(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    test_db.refresh(review)
+    response = client.patch(
+        f"/users/me/reviews/{review.id}",
+        json={"review_str": "string", "rating": 10},
+    )
+    test_db.refresh(review)
+    assert response.status_code == 200
+    assert review.updated_date == date.today()
