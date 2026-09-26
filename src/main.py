@@ -480,9 +480,9 @@ def edit_review(
     if current.id != review.user_id:
         raise HTTPException(status_code=403, detail="Unauthorized")
 
-    review.review_str = edit.review_str
-    review.rating = edit.rating
-    review.updated_date = date.today()
+    updates = edit.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(review, field, value)
     db.commit()
     return {"message": "Review edited"}
 
