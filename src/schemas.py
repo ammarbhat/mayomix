@@ -42,7 +42,6 @@ class ReviewBase(BaseModel):
     review_str: str
     rating: int = Field(lt=11)
     mbid: str
-    user_id: int
     create_date: date
 
 

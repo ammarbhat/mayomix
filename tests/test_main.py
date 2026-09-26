@@ -414,7 +414,6 @@ def test_add_review():
         json={
             "review_str": "string",
             "rating": 10,
-            "user_id": 1,
             "mbid": "str",
             "create_date": "2026-09-25",
         },
@@ -428,7 +427,6 @@ def test_add_review_without_mbid():
         json={
             "review_str": "string",
             "rating": 10,
-            "user_id": 1,
             "create_date": "2026-09-25",
         },
     )
@@ -451,7 +449,6 @@ def test_add_review_duplicate(test_db):
             "review_str": "blah blah",
             "rating": 7,
             "mbid": "heyheyhey",
-            "user_id": 1,
             "create_date": "2026-09-09",
         },
     )
@@ -464,7 +461,6 @@ def test_add_review_rating_limit():
         json={
             "review_str": "string",
             "rating": 11,
-            "user_id": 1,
             "mbid": "str",
             "create_date": "2026-09-25",
         },
