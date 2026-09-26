@@ -504,3 +504,23 @@ def test_get_user_reviews(test_db):
 def test_get_user_reviews_user_not_found():
     response = client.get(f"/users/{99}/reviews")
     assert response.status_code == 404
+
+
+def test_get_album_reviews_not_found():
+    response = client.get(f"/albums/hey/reviews")
+    assert response.status_code == 404
+
+
+def test_get_album_reviews(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+
+    response = client.get("/albums/heyheyhey/reviews")
+    assert response.status_code == 200
