@@ -479,3 +479,28 @@ def test_add_review_invalid():
         },
     )
     assert response.status_code == 422
+
+
+def test_get_user_reviews_not_found():
+    response = client.get(f"/users/{1}/reviews")
+    assert response.status_code == 404
+
+
+def test_get_user_reviews(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+
+    response = client.get(f"/users/{1}/reviews")
+    assert response.status_code == 200
+
+
+def test_get_user_reviews_user_not_found():
+    response = client.get(f"/users/{99}/reviews")
+    assert response.status_code == 404
