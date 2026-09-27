@@ -580,6 +580,8 @@ def get_connections(
         .all()
     )
     respli = connect1 + connect2
+    if not respli:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
     return respli
 
 

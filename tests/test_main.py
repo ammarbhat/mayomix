@@ -721,3 +721,50 @@ def test_delete_connection_acceped(test_db):
     test_db.refresh(test_con)
     response = client.delete(f"/connections/{test_con.id}/delete")
     assert response.status_code == 200
+
+
+def test_get_connections(test_db):
+    test_con = Connection(
+        user_id1=1, user_id2=67, accepted=True, connect_date=date.today()
+    )
+    test_con2 = Connection(
+        user_id1=6, user_id2=1, accepted=True, connect_date=date.today()
+    )
+    test_db.add(test_con)
+    test_db.add(test_con2)
+    test_db.commit()
+    test_db.refresh(test_con)
+    test_db.refresh(test_con2)
+    response = client.get("/connections/me")
+    assert response.status_code == 200
+
+
+def test_get_connections_not_found():
+    response = client.get("/connections/me")
+    assert response.status_code == 404
+
+
+def test_get_pending_connections_not_found():
+    response = client.get("/connections/me/pending")
+    assert response.status_code == 404
+
+
+def test_get_pending_connections(test_db):
+    test_con = Connection(user_id1=6, user_id2=1)
+    test_db.add(test_con)
+    test_db.commit()
+    response = client.get("/connections/me/pending")
+    assert response.status_code == 200
+
+
+def test_get_sent_connections_not_found():
+    response = client.get("/connections/me/sent")
+    assert response.status_code == 404
+
+
+def test_get_sent_connections(test_db):
+    test_con = Connection(user_id1=1, user_id2=13)
+    test_db.add(test_con)
+    test_db.commit()
+    response = client.get("/connections/me/sent")
+    assert response.status_code == 200
