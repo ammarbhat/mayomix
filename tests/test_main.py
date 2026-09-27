@@ -668,3 +668,31 @@ def test_send_connection_existing(test_db):
     test_db.commit()
     response = client.post(f"/connections/{test_user.id}")
     assert response.status_code == 400
+
+
+def test_accept_connection(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(user_id1=1, user_id2=test_user.id)
+    test_db.add(test_con)
+    test_db.commit()
+    test_db.refresh(test_con)
+    response = client.patch(f"/connections/{test_con.id}/accept")
+    test_db.refresh(test_con)
+    assert test_con.accepted == True
+    assert response.status_code == 200
+
+
+def test_accept_connecton_not_found():
+    response = client.patch(f"/connections/{1}/accept")
+    assert response.status_code == 404

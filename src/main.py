@@ -544,10 +544,11 @@ def accept_connection(
 ):
 
     connect = db.query(Connection).filter(Connection.id == con_id).first()
-    if current.id != connect.user_id1:
-        raise HTTPException(status_code=400, detail="Unauthorized")
     if not connect:
         raise HTTPException(status_code=404, detail="Not found")
+    if current.id != connect.user_id1:
+        raise HTTPException(status_code=400, detail="Unauthorized")
+
     connect.accepted = True
     connect.connect_date = date.today()
     db.commit()
