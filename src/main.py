@@ -488,7 +488,7 @@ def edit_review(
     return {"message": "Review edited"}
 
 
-@app.delete("users/me/reviews/{review_id}")
+@app.delete("/users/me/reviews/{review_id}")
 def delete_review(
     review_id: int,
     current: Annotated[User, Depends(get_current_user)],
