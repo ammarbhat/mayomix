@@ -696,3 +696,28 @@ def test_accept_connection(test_db):
 def test_accept_connecton_not_found():
     response = client.patch(f"/connections/{1}/accept")
     assert response.status_code == 404
+
+
+def test_delete_connect_request_not_found():
+    response = client.delete(f"/conncections/{1}/delete")
+    assert response.status_code == 404
+
+
+def test_delete_connection_not_acceped(test_db):
+    test_con = Connection(user_id1=1, user_id2=67)
+    test_db.add(test_con)
+    test_db.commit()
+    test_db.refresh(test_con)
+    response = client.delete(f"/connections/{test_con.id}/delete")
+    assert response.status_code == 200
+
+
+def test_delete_connection_acceped(test_db):
+    test_con = Connection(
+        user_id1=1, user_id2=67, accepted=True, connect_date=date.today()
+    )
+    test_db.add(test_con)
+    test_db.commit()
+    test_db.refresh(test_con)
+    response = client.delete(f"/connections/{test_con.id}/delete")
+    assert response.status_code == 200

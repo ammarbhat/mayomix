@@ -556,7 +556,7 @@ def accept_connection(
 
 
 @app.delete("/connections/{con_id}/delete")
-def delete_req_friend(con_id: int, db=Depends(get_db)):
+def delete_request_connection(con_id: int, db=Depends(get_db)):
     connect = db.query(Connection).filter(Connection.id == con_id).first()
     if not connect:
         raise HTTPException(status_code=404, detail="Not found")
