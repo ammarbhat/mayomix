@@ -510,6 +510,11 @@ def send_connection(
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
+    if user_id == current.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot send connection to self",
+        )
     con1 = (
         db.query(Connection)
         .filter(Connection.user_id1 == current.id, Connection.user_id2 == user_id)

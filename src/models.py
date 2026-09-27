@@ -1,5 +1,12 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, JSON, UniqueConstraint, CheckConstraint
+from sqlalchemy import (
+    ForeignKey,
+    String,
+    JSON,
+    UniqueConstraint,
+    CheckConstraint,
+    Boolean,
+)
 from src.database import Base
 from typing import List
 from datetime import datetime, date
@@ -64,5 +71,5 @@ class Connection(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id1: Mapped[int]
     user_id2: Mapped[int]
-    accepted: Mapped[bool]
+    accepted: Mapped[bool] = mapped_column(Boolean, default=False)
     connect_date: Mapped[date | None]
