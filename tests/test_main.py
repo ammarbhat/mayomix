@@ -586,3 +586,38 @@ def test_edit_review(test_db):
     test_db.refresh(review)
     assert response.status_code == 200
     assert review.updated_date == date.today()
+
+
+def test_delete_review_not_found():
+    response = client.delete(f"/users/me/reviews/{1}")
+    assert response.status_code == 404
+
+
+def test_delete_review(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=1,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    test_db.refresh(review)
+    response = client.delete(f"/users/me/reviews/{review.id}")
+    assert response.status_code == 200
+
+
+def test_delete_review_unauthorized(test_db):
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=99,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    test_db.refresh(review)
+    response = client.delete(f"/users/me/reviews/{review.id}")
+    assert response.status_code == 403
