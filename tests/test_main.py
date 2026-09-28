@@ -768,3 +768,38 @@ def test_get_sent_connections(test_db):
     test_db.commit()
     response = client.get("/connections/me/sent")
     assert response.status_code == 200
+
+
+def test_activity_not_found():
+    response = client.get("/activity")
+    assert response.status_code == 404
+
+
+def test_activty(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(user_id1=1, user_id2=test_user.id, accepted=True)
+    test_db.add(test_con)
+    test_db.commit()
+    test_db.refresh(test_con)
+    review = Review(
+        review_str="string",
+        rating=7,
+        user_id=test_user.id,
+        mbid="heyheyhey",
+        create_date=date.today(),
+    )
+    test_db.add(review)
+    test_db.commit()
+    response = client.get("/activity")
+    assert response.status_code == 200

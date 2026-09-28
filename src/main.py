@@ -626,7 +626,8 @@ def get_activity(
         )
         .all()
     )
-
+    if not connections:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
     ids = {current.id}
     for c in connections:
         ids.add(c.user_id1)
@@ -635,8 +636,10 @@ def get_activity(
     activity = (
         db.query(Review)
         .filter(Review.user_id.in_(ids))
-        .order_by(Review.date_created.desc())
+        .order_by(Review.create_date.desc())
         .limit(7)
         .all()
     )
+    if not activity:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
     return activity
