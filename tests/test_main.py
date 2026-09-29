@@ -693,14 +693,14 @@ def test_accept_connection(test_db):
     test_db.add(test_user)
     test_db.commit()
     test_db.refresh(test_user)
-    test_con = Connection(user_id1=1, user_id2=test_user.id)
+    test_con = Connection(user_id1=test_user.id, user_id2=1)
     test_db.add(test_con)
     test_db.commit()
     test_db.refresh(test_con)
     response = client.patch(f"/connections/{test_con.id}/accept")
     test_db.refresh(test_con)
-    assert test_con.accepted == True
     assert response.status_code == 200
+    assert test_con.accepted == True
 
 
 def test_accept_connecton_not_found():

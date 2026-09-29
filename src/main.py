@@ -379,12 +379,13 @@ def add_taste_entry(
 def delete_taste_entry(
     id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
-    taste_entry = db.query(TasteEntry).filter(TasteEntry.id == id).first()
-    user = db.query(TasteEntry).filter(TasteEntry.user_id == current.id).first()
+    taste_entry = (
+        db.query(TasteEntry)
+        .filter(TasteEntry.id == id, TasteEntry.user_id == current.id)
+        .first()
+    )
     if not taste_entry:
         raise HTTPException(status_code=404, detail="Not found")
-    if not user:
-        raise HTTPException(status_code=403, detail="Forbidden")
     db.delete(taste_entry)
     db.commit()
     return {"message": "Note deleted"}
@@ -555,12 +556,13 @@ def accept_connection(
     con_id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
 
-    connect = db.query(Connection).filter(Connection.id == con_id).first()
+    connect = (
+        db.query(Connection)
+        .filter(Connection.id == con_id, Connection.user_id2 == current.id)
+        .first()
+    )
     if not connect:
         raise HTTPException(status_code=404, detail="Not found")
-    if current.id != connect.user_id1:
-        raise HTTPException(status_code=400, detail="Unauthorized")
-
     connect.accepted = True
     connect.connect_date = date.today()
     db.commit()
