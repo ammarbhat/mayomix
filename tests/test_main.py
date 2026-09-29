@@ -8,7 +8,6 @@ from src.models import TasteEntry, User, Review, Connection
 from datetime import date
 from sqlalchemy.pool import StaticPool
 from pwdlib import PasswordHash
-from fastapi.security import OAuth2PasswordRequestForm
 
 password_hash = PasswordHash.recommended()
 
@@ -286,6 +285,31 @@ def test_add_taste_entry_duplicate_mbid(test_db):
         json={"mbid": "hello", "rank": 3, "liked": False},
     )
     assert response.status_code == 403
+
+
+def test_add_taste_entry_multiple_user(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=3, user_id=test_user.id, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    response = client.post(
+        "/users/me/taste?category=top_songs",
+        json={"mbid": "hello", "rank": 3, "liked": True},
+    )
+    assert response.status_code == 200
 
 
 def test_add_taste_entry_ivalid_data():

@@ -329,12 +329,18 @@ def add_taste_entry(
 ):
     test = (
         db.query(TasteEntry)
-        .filter(TasteEntry.mbid == entry.mbid, TasteEntry.category == category)
+        .filter(
+            ((TasteEntry.mbid == entry.mbid) | (TasteEntry.category == category)),
+            (TasteEntry.user_id == current.id),
+        )
         .first()
     )
     test2 = (
         db.query(TasteEntry)
-        .filter(TasteEntry.rank == entry.rank, TasteEntry.category == category)
+        .filter(
+            ((TasteEntry.rank == entry.rank) | (TasteEntry.category == category)),
+            (TasteEntry.user_id == current.id),
+        )
         .first()
     )
     if test or test2:

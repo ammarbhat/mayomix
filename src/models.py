@@ -33,7 +33,7 @@ class User(Base):
 class TasteEntry(Base):
     __tablename__ = "taste_entry"
     __table_args__ = (
-        UniqueConstraint("rank", "mbid", name="uq_rank_mbid"),
+        UniqueConstraint("rank", "mbid", "user_id", name="uq_rank_mbid_user_id"),
         CheckConstraint("rank > 0 AND rank < 11", name="non_zero_rank"),
     )
 
