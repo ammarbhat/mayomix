@@ -215,9 +215,14 @@ def get_user_by_username(username: str, db=Depends(get_db)):
     return resp
 
 
-@app.patch("/users/{id}")
-def edit_user(edits: EditBase, id: int, db=Depends(get_db)):
-    user = db.query(User).filter(User.id == id).first()
+@app.patch("/users/me")
+def edit_user(
+    edits: EditBase,
+    current=Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+
+    user = db.query(User).filter(User.id == current.id).first()
     test_user = db.query(User).filter(User.username == edits.username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
