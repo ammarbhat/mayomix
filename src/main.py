@@ -21,7 +21,6 @@ from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
 from src.database import get_db, Base, engine
 from sqlalchemy.exc import IntegrityError
-import requests
 import httpx
 from sqlalchemy import or_, select
 
@@ -54,28 +53,6 @@ def check_taste_entry(entry, category):
         if entry.rank > 3:
             return False
         return True
-
-
-def select_best_release(release_group: dict) -> str | None:
-    releases = release_group.get("releases", [])
-
-    if not releases:
-        return None
-
-    group_title = release_group.get("title", "")
-
-    official = [r for r in releases if r.get("status") == "Official"]
-
-    candidates = official if official else releases
-
-    exact_title_matches = [r for r in candidates if r.get("title") == group_title]
-
-    if exact_title_matches:
-        candidates = exact_title_matches
-
-    candidates = sorted(candidates, key=lambda r: r.get("date") or "9999-99-99")
-
-    return candidates[0].get("id")
 
 
 def verify_password(password, hash):
@@ -216,7 +193,7 @@ def get_user_by_username(username: str, db=Depends(get_db)):
 @app.patch("/users/me")
 def edit_user(
     edits: EditBase,
-    current=Annotated[User, Depends(get_current_user)],
+    current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
 
@@ -235,18 +212,18 @@ def edit_user(
     return {"message": "Edits saved"}
 
 
-@app.delete("/users/{id}")
+@app.delete("/users/{username}")
 def delete_user(
-    id: int,
+    username: str,
     current: Annotated[User, Depends(get_current_user)],
     pwd: Classified,
     db=Depends(get_db),
 ):
-    if id != current.id:
+    if username != current.username:
         raise HTTPException(status_code=404, detail="Not found")
     if not verify_password(pwd.password, current.hash_password):
         raise HTTPException(status_code=401, detail="Incorrect password")
-    user = db.query(User).filter(User.id == current.id).first()
+    user = db.query(User).filter(User.username == current.username).first()
     reviews = db.query(Review).filter(Review.user_id == current.id).all()
     tastes = db.query(TasteEntry).filter(TasteEntry.user_id == current.id).all()
     connections = db.scalars(
@@ -255,11 +232,14 @@ def delete_user(
         )
     ).all()
     if reviews:
-        db.delete(reviews)
+        for r in reviews:
+            db.delete(r)
     if tastes:
-        db.delete(tastes)
+        for t in tastes:
+            db.delete(t)
     if connections:
-        db.delete(connections)
+        for c in connections:
+            db.delete(c)
     db.delete(user)
     db.commit()
     return {"message": "User deleted"}
@@ -359,7 +339,7 @@ def add_taste_entry(
         )
         .first()
     )
-    if test or test2:
+    if test and test2:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="already taken"
         )
@@ -401,14 +381,14 @@ def delete_taste_entry(
     return {"message": "Note deleted"}
 
 
-@app.get("/users/{user_id}/taste")
-def get_user_entries(user_id: int, category: CategorySelect, db=Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
+@app.get("/users/{username}/taste")
+def get_user_entries(username: str, category: CategorySelect, db=Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=404, detail="Not found")
     taste_entries = (
         db.query(TasteEntry)
-        .filter(TasteEntry.category == category, TasteEntry.user_id == user_id)
+        .filter(TasteEntry.category == category, TasteEntry.user_id == user.id)
         .all()
     )
     if not taste_entries:
@@ -472,9 +452,13 @@ def add_review(
     return {"message": "Review added"}
 
 
-@app.get("/users/{user_id}/reviews")
-def get_all_reviews(user_id: int, db=Depends(get_db)):
-    reviews = db.query(Review).filter(Review.user_id == user_id).all()
+@app.get("/users/{username}/reviews")
+def get_all_reviews(username: str, db=Depends(get_db)):
+    usr = db.query(User).filter(User.username == username).first()
+    if not usr:
+        raise HTTPException(status_code=404, detail="User not found")
+    reviews = db.query(Review).filter(Review.user_id == usr.id).all()
+
     if not reviews:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     return reviews
@@ -539,6 +523,9 @@ def send_connection(
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
+    usr = db.query(User).filter(User.id == user_id).first()
+    if not usr:
+        raise HTTPException(status_code=404, detail="Not found")
     if user_id == current.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -585,7 +572,7 @@ def accept_connection(
     return {"message": "Connection accepted"}
 
 
-@app.delete("/connections/{con_id}/delete")
+@app.delete("/connections/{con_id}")
 def delete_request_connection(
     current: Annotated[User, Depends(get_current_user)], con_id: int, db=Depends(get_db)
 ):

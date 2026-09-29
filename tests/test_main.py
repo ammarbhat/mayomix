@@ -234,21 +234,17 @@ def test_edit_user_empty(test_db):
 
 
 def test_delete_user(test_db):
-    user = test_db.query(User).filter(User.id == 1).first()
-
-    response = client.request(
-        "DELETE", f"/users/{user.id}", json={"password": "string"}
-    )
+    response = client.request("DELETE", f"/users/testusr", json={"password": "string"})
     assert response.status_code == 200
 
 
 def test_delete_user_not_found(test_db):
-    response = client.request("DELETE", f"/users/{9797}", json={"password": "string"})
+    response = client.request("DELETE", f"/users/jsdf", json={"password": "string"})
     assert response.status_code == 404
 
 
 def test_delete_user_incorrect_password(test_db):
-    response = client.request("DELETE", f"/users/{1}", json={"password": "strings"})
+    response = client.request("DELETE", f"/users/testusr", json={"password": "strings"})
     assert response.status_code == 401
 
 
@@ -358,12 +354,12 @@ def test_get_user_entries(test_db):
     test_db.add(entry)
     test_db.commit()
     test_db.refresh(entry)
-    response = client.get(f"/users/{1}/taste?category=top_songs")
+    response = client.get(f"/users/testusr/taste?category=top_songs")
     assert response.status_code == 200
 
 
 def test_get_user_entries_not_found():
-    response = client.get(f"/users/{1}/taste?category=top_songs")
+    response = client.get(f"/users/testusr/taste?category=top_songs")
     assert response.status_code == 404
 
 
@@ -492,7 +488,7 @@ def test_add_review_invalid():
 
 
 def test_get_user_reviews_not_found():
-    response = client.get(f"/users/{1}/reviews")
+    response = client.get(f"/users/testusr/reviews")
     assert response.status_code == 404
 
 
@@ -507,12 +503,12 @@ def test_get_user_reviews(test_db):
     test_db.add(review)
     test_db.commit()
 
-    response = client.get(f"/users/{1}/reviews")
+    response = client.get(f"/users/testusr/reviews")
     assert response.status_code == 200
 
 
 def test_get_user_reviews_user_not_found():
-    response = client.get(f"/users/{99}/reviews")
+    response = client.get(f"/users/jinglemster/reviews")
     assert response.status_code == 404
 
 
@@ -709,7 +705,7 @@ def test_accept_connecton_not_found():
 
 
 def test_delete_connect_request_not_found():
-    response = client.delete(f"/conncections/{1}/delete")
+    response = client.delete(f"/connections/{1}")
     assert response.status_code == 404
 
 
@@ -718,7 +714,7 @@ def test_delete_connection_not_acceped(test_db):
     test_db.add(test_con)
     test_db.commit()
     test_db.refresh(test_con)
-    response = client.delete(f"/connections/{test_con.id}/delete")
+    response = client.delete(f"/connections/{test_con.id}")
     assert response.status_code == 200
 
 
@@ -729,7 +725,7 @@ def test_delete_connection_acceped(test_db):
     test_db.add(test_con)
     test_db.commit()
     test_db.refresh(test_con)
-    response = client.delete(f"/connections/{test_con.id}/delete")
+    response = client.delete(f"/connections/{test_con.id}")
     assert response.status_code == 200
 
 
