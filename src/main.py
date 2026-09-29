@@ -22,6 +22,7 @@ from src.database import get_db, Base, engine
 from sqlalchemy.exc import IntegrityError
 import requests
 import httpx
+from sqlalchemy import or_, select
 
 app = FastAPI()
 from dotenv import load_dotenv
@@ -375,7 +376,7 @@ def add_taste_entry(
 
 
 @app.delete("/users/me/taste/{id}")
-def del_taste_entry(
+def delete_taste_entry(
     id: int, current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
     taste_entry = db.query(TasteEntry).filter(TasteEntry.id == id).first()
@@ -567,8 +568,16 @@ def accept_connection(
 
 
 @app.delete("/connections/{con_id}/delete")
-def delete_request_connection(con_id: int, db=Depends(get_db)):
-    connect = db.query(Connection).filter(Connection.id == con_id).first()
+def delete_request_connection(
+    current: Annotated[User, Depends(get_current_user)], con_id: int, db=Depends(get_db)
+):
+    connect = db.scalars(
+        select(Connection).where(
+            or_(Connection.user_id2 == current.id, Connection.user_id1 == current.id),
+            (Connection.id == con_id),
+        ),
+    ).first()
+
     if not connect:
         raise HTTPException(status_code=404, detail="Not found")
     db.delete(connect)
