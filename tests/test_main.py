@@ -131,7 +131,7 @@ def test_add_user_duplicate_username(test_db):
             "pwd": {"password": "string"},
         },
     )
-    assert response.status_code == 400
+    assert response.status_code == 409
 
 
 def test_add_user_incomplete_data(test_db):
@@ -205,7 +205,7 @@ def test_edit_user_duplicate_username(test_db):
             "fav_genres": ["string"],
         },
     )
-    assert response.status_code == 403
+    assert response.status_code == 409
 
 
 def test_edit_bio(test_db):
@@ -270,7 +270,7 @@ def test_add_taste_entry_duplicate_mbid(test_db):
         "/users/me/taste?category=top_songs",
         json={"mbid": "hello", "rank": 3, "liked": False},
     )
-    assert response.status_code == 403
+    assert response.status_code == 409
 
 
 def test_add_taste_entry_multiple_user(test_db):
@@ -316,7 +316,7 @@ def test_add_taste_entry_duplicate_rank(test_db):
         "/users/me/taste?category=top_songs",
         json={"mbid": "hello", "rank": 2, "liked": False},
     )
-    assert response.status_code == 403
+    assert response.status_code == 409
 
 
 def test_add_taste_song_limit(test_db):
@@ -462,7 +462,7 @@ def test_add_review_duplicate(test_db):
             "create_date": "2026-09-09",
         },
     )
-    assert response.status_code == 403
+    assert response.status_code == 409
 
 
 def test_add_review_rating_limit():
@@ -677,7 +677,7 @@ def test_send_connection_existing(test_db):
     test_db.add(test_con)
     test_db.commit()
     response = client.post(f"/connections/{test_user.id}")
-    assert response.status_code == 400
+    assert response.status_code == 409
 
 
 def test_accept_connection(test_db):

@@ -10,7 +10,6 @@ class UserBase(BaseModel):
     bio: str | None = None
     email: EmailStr
     pfp_link: str | None = None
-    create_date: date
     fav_genres: list
 
 
@@ -34,15 +33,14 @@ class TasteBase(BaseModel):
 
 class EditTaste(BaseModel):
     mbid: str | None = None
-    rank: int | None = None
+    rank: int | None = Field(gt=0, default=None)
     liked: bool | None = None
 
 
 class ReviewBase(BaseModel):
     review_str: str
-    rating: int = Field(lt=11)
+    rating: int = Field(lt=11, gt=0)
     mbid: str
-    create_date: date
 
 
 class Token(BaseModel):
@@ -63,5 +61,12 @@ class CategorySelect(str, Enum):
 
 class EditReview(BaseModel):
     review_str: str | None = None
-    rating: int | None = None
-    updated_date: date | None = None
+    rating: int | None = Field(gt=0, lt=11, default=None)
+
+
+class UserResponse(BaseModel):
+    name: str
+    username: str
+    bio: str | None = None
+    pfp_link: str | None = None
+    fav_genres: list

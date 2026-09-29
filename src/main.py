@@ -15,6 +15,7 @@ from src.schemas import (
     EditTaste,
     ReviewBase,
     EditReview,
+    UserResponse,
 )
 from datetime import timedelta, timezone, datetime, date
 from typing import Annotated
@@ -163,7 +164,7 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     if check:
         if check.username == user.username:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_409_CONFLICT,
                 detail="username already exists",
             )
     new_user = User(
@@ -195,20 +196,18 @@ def get_me(current: Annotated[User, Depends(get_current_user)]):
     return user
 
 
-@app.get("/users/{username}", response_model=UserBase)
+@app.get("/users/{username}", response_model=UserResponse)
 def get_user_by_username(username: str, db=Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="user not found"
         )
-    resp = UserBase(
+    resp = UserResponse(
         name=user.name,
         username=user.username,
         bio=user.bio,
-        email=user.email,
         pfp_link=user.pfp_link,
-        create_date=user.create_date,
         fav_genres=user.fav_genres,
     )
     return resp
@@ -226,7 +225,7 @@ def edit_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if test_user:
-        raise HTTPException(status_code=403, detail="username already taken")
+        raise HTTPException(status_code=409, detail="username already taken")
 
     updates = edits.model_dump(exclude_unset=True)
     for field, value in updates.items():
@@ -362,7 +361,7 @@ def add_taste_entry(
     )
     if test or test2:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="already taken"
+            status_code=status.HTTP_409_CONFLICT, detail="already taken"
         )
     if not check_taste_entry(entry, category):
         raise HTTPException(
@@ -381,7 +380,7 @@ def add_taste_entry(
     except IntegrityError:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Rank already taken"
+            status_code=status.HTTP_409_CONFLICT, detail="Rank already taken"
         )
     return {"message": "Entry added"}
 
@@ -453,7 +452,7 @@ def add_review(
     )
     if test:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Review already exists"
+            status_code=status.HTTP_409_CONFLICT, detail="Review already exists"
         )
     new_review = Review(
         review_str=review.review_str,
@@ -466,8 +465,9 @@ def add_review(
         db.add(new_review)
         db.commit()
     except IntegrityError:
+        db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Review already exists"
+            status_code=status.HTTP_409_CONFLICT, detail="Review already exists"
         )
     return {"message": "Review added"}
 
@@ -556,7 +556,7 @@ def send_connection(
     )
     if con1 or con2:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Connection already exists"
+            status_code=status.HTTP_409_CONFLICT, detail="Connection already exists"
         )
     new_con = Connection(user_id1=current.id, user_id2=user_id)
     reciever = db.query(User).filter(User.id == user_id).first()
