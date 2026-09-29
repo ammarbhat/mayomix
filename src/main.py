@@ -95,8 +95,6 @@ def get_password_hash(password):
 
 def get_user(db, username):
     user = db.query(User).filter(User.username == username).first()
-    if not user:
-        return False
     return user
 
 
@@ -410,11 +408,16 @@ def get_user_entries(user_id: int, category: CategorySelect, db=Depends(get_db))
 
 @app.patch("/users/me/taste/{entry_id}")
 def edit_entry(
+    entry_id: int,
     edits: EditTaste,
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
-    entry = db.query(TasteEntry).filter(TasteEntry.user_id == current.id).first()
+    entry = (
+        db.query(TasteEntry)
+        .filter(TasteEntry.user_id == current.id, TasteEntry.id == entry_id)
+        .first()
+    )
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     updates = edits.model_dump(exclude_unset=True)
@@ -465,8 +468,8 @@ def get_all_reviews(user_id: int, db=Depends(get_db)):
 
 
 @app.get("/reviews/{review_id}")
-def get_review_by_id(reveiw_id: int, db=Depends(get_db)):
-    review = db.query(Review).filter(Review.id == reveiw_id).first()
+def get_review_by_id(review_id: int, db=Depends(get_db)):
+    review = db.query(Review).filter(Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="Not found")
     return review

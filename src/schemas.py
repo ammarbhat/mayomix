@@ -28,7 +28,7 @@ class Classified(BaseModel):
 
 class TasteBase(BaseModel):
     mbid: str
-    rank: int = Field(ge=0)
+    rank: int = Field(gt=0)
     liked: bool = False
 
 
