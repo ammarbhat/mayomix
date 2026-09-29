@@ -248,6 +248,19 @@ def delete_user(
     if not verify_password(pwd.password, current.hash_password):
         raise HTTPException(status_code=401, detail="Incorrect password")
     user = db.query(User).filter(User.id == current.id).first()
+    reviews = db.query(Review).filter(Review.user_id == current.id).all()
+    tastes = db.query(TasteEntry).filter(TasteEntry.user_id == current.id).all()
+    connections = db.scalars(
+        select(Connection).where(
+            or_(Connection.user_id1 == current.id, Connection.user_id2 == current.id)
+        )
+    ).all()
+    if reviews:
+        db.delete(reviews)
+    if tastes:
+        db.delete(tastes)
+    if connections:
+        db.delete(connections)
     db.delete(user)
     db.commit()
     return {"message": "User deleted"}
