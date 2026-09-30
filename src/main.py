@@ -28,7 +28,7 @@ from src.dependencies import (
     create_access_token,
     get_current_user,
 )
-from src.routers import users, music, taste
+from src.routers import users, music, taste, reviews
 
 app = FastAPI()
 
@@ -39,6 +39,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 app.include_router(users.router)
 app.include_router(music.router)
 app.include_router(taste.router)
+app.include_router(reviews.router)
 
 
 @app.get("/")
@@ -62,108 +63,6 @@ def login_for_acess_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
-
-
-@app.post("/users/me/reviews")
-def add_review(
-    review: ReviewBase,
-    current: Annotated[User, Depends(get_current_user)],
-    db=Depends(get_db),
-):
-    test = (
-        db.query(Review)
-        .filter(Review.mbid == review.mbid, Review.user_id == current.id)
-        .first()
-    )
-    if test:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Review already exists"
-        )
-    new_review = Review(
-        review_str=review.review_str,
-        rating=review.rating,
-        user_id=current.id,
-        mbid=review.mbid,
-        create_date=date.today(),
-    )
-    try:
-        db.add(new_review)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Review already exists"
-        )
-    return {"message": "Review added"}
-
-
-@app.get("/users/{username}/reviews")
-def get_all_reviews(username: str, db=Depends(get_db)):
-    usr = db.query(User).filter(User.username == username).first()
-    if not usr:
-        raise HTTPException(status_code=404, detail="User not found")
-    reviews = db.query(Review).filter(Review.user_id == usr.id).all()
-
-    if not reviews:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-    return reviews
-
-
-@app.get("/reviews/{review_id}")
-def get_review_by_id(review_id: int, db=Depends(get_db)):
-    review = db.query(Review).filter(Review.id == review_id).first()
-    if not review:
-        raise HTTPException(status_code=404, detail="Not found")
-    return review
-
-
-@app.get("/albums/{album_mbid}/reviews")
-def get_reviews_by_album(album_mbid: str, db=Depends(get_db)):
-    reviews = db.query(Review).filter(Review.mbid == album_mbid).all()
-    if not reviews:
-        raise HTTPException(status_code=404, detail="Not found")
-    return reviews
-
-
-@app.patch("/users/me/reviews/{review_id}")
-def edit_review(
-    review_id: int,
-    edit: EditReview,
-    current: Annotated[User, Depends(get_current_user)],
-    db=Depends(get_db),
-):
-    review = db.query(Review).filter(Review.id == review_id).first()
-    if not review:
-        raise HTTPException(status_code=404, detail="Not found")
-    if current.id != review.user_id:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-
-    updates = edit.model_dump(exclude_unset=True)
-    for field, value in updates.items():
-        setattr(review, field, value)
-    review.updated_date = date.today()
-    try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
-    return {"message": "Review edited"}
-
-
-@app.delete("/users/me/reviews/{review_id}")
-def delete_review(
-    review_id: int,
-    current: Annotated[User, Depends(get_current_user)],
-    db=Depends(get_db),
-):
-    review = db.query(Review).filter(Review.id == review_id).first()
-    if not review:
-        raise HTTPException(status_code=404, detail="Not found")
-    if current.id != review.user_id:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    db.delete(review)
-    db.commit()
-    return {"message": "Review deleted"}
 
 
 @app.post("/connections/{user_id}")
