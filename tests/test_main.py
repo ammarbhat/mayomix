@@ -320,7 +320,7 @@ def test_add_taste_song_limit(test_db):
         "/users/me/taste?category=top_songs",
         json={"mbid": "hello", "rank": 11, "liked": False},
     )
-    assert response.status_code == 403
+    assert response.status_code == 400
 
 
 def test_add_entry_others_limit():
@@ -328,7 +328,7 @@ def test_add_entry_others_limit():
         "/users/me/taste?category=top_albums",
         json={"mbid": "hello", "rank": 4, "liked": False},
     )
-    assert response.status_code == 403
+    assert response.status_code == 400
 
 
 def test_delete_taste_entry(test_db):
@@ -454,7 +454,7 @@ def test_edit_entry_one_field_bool(test_db):
     test_db.refresh(entry)
     response = client.patch(
         f"/users/me/taste/{entry.id}?category=top_songs",
-        json={"like": True},
+        json={"liked": True},
     )
     assert response.status_code == 200
 

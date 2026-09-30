@@ -14,7 +14,10 @@ from datetime import datetime, date
 
 class User(Base):
     __tablename__ = "user"
-    # __table_args__ = (UniqueConstraint("username", name="uq_username"),)
+    __table_args__ = (
+        UniqueConstraint("username", name="uq_username"),
+        UniqueConstraint("email", name="uq_email"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
@@ -33,7 +36,10 @@ class User(Base):
 class TasteEntry(Base):
     __tablename__ = "taste_entry"
     __table_args__ = (
-        UniqueConstraint("rank", "mbid", "user_id", name="uq_rank_mbid_user_id"),
+        UniqueConstraint("rank", "category", "user_id", name="uq_rank_catgory_user_id"),
+        UniqueConstraint(
+            "mbid", "category", "user_id", name="uq_mbid_category_user_id"
+        ),
         CheckConstraint("rank > 0 AND rank < 11", name="non_zero_rank"),
     )
 

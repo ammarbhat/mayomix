@@ -206,8 +206,12 @@ def edit_user(
     db=Depends(get_db),
 ):
 
-    user = db.query(User).filter(User.id == current.id).first()
-    test_user = db.query(User).filter(User.username == edits.username).first()
+    user = db.query(User).filter(User.username == current.username).first()
+    test_user = (
+        db.query(User)
+        .filter(User.id != current.id, User.username == edits.username)
+        .first()
+    )
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if test_user:
@@ -352,7 +356,7 @@ def add_taste_entry(
         )
     if not check_taste_entry(entry, category):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="rank limit reached"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="rank limit reached"
         )
     taste = TasteEntry(
         mbid=entry.mbid,
@@ -366,9 +370,7 @@ def add_taste_entry(
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Rank already taken"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     return {"message": "Entry added"}
 
 
@@ -586,9 +588,6 @@ def send_connection(
             status_code=status.HTTP_409_CONFLICT, detail="Connection already exists"
         )
     new_con = Connection(user_id1=current.id, user_id2=user_id)
-    reciever = db.query(User).filter(User.id == user_id).first()
-    if not reciever:
-        raise HTTPException(status_code=404, detail="Not found")
     db.add(new_con)
     db.commit()
     return {"message": "Connection request sent"}
