@@ -22,7 +22,7 @@ from typing import Annotated
 from src.database import get_db, Base, engine
 from sqlalchemy.exc import IntegrityError
 import httpx
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, and_
 
 app = FastAPI()
 from dotenv import load_dotenv
@@ -323,25 +323,19 @@ def add_taste_entry(
     current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
-    test = (
-        db.query(TasteEntry)
-        .filter(
-            ((TasteEntry.mbid == entry.mbid) | (TasteEntry.category == category)),
-            (TasteEntry.user_id == current.id),
+    test = db.scalars(
+        select(TasteEntry).where(
+            TasteEntry.user_id == current.id,
+            TasteEntry.category == category,
+            or_(
+                TasteEntry.mbid == entry.mbid,
+                TasteEntry.rank == entry.rank,
+            ),
         )
-        .first()
-    )
-    test2 = (
-        db.query(TasteEntry)
-        .filter(
-            ((TasteEntry.rank == entry.rank) | (TasteEntry.category == category)),
-            (TasteEntry.user_id == current.id),
-        )
-        .first()
-    )
-    if test and test2:
+    ).first()
+    if test:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="already taken"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="already taken"
         )
     if not check_taste_entry(entry, category):
         raise HTTPException(
@@ -360,7 +354,7 @@ def add_taste_entry(
     except IntegrityError:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Rank already taken"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Rank already taken"
         )
     return {"message": "Entry added"}
 
@@ -412,6 +406,25 @@ def edit_entry(
     )
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+    test = db.scalars(
+        select(TasteEntry).where(
+            TasteEntry.category == entry.category,
+            TasteEntry.user_id == current.id,
+            or_(
+                TasteEntry.mbid == edits.mbid,
+                TasteEntry.rank == edits.rank,
+            ),
+        )
+    ).first()
+    if test:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="already taken"
+        )
+    if edits.rank:
+        if not check_taste_entry(edits, entry.category):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="rank limit reached"
+            )
     updates = edits.model_dump(exclude_unset=True)
     for field, value in updates.items():
         setattr(entry, field, value)

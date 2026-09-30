@@ -266,7 +266,7 @@ def test_add_taste_entry_duplicate_mbid(test_db):
         "/users/me/taste?category=top_songs",
         json={"mbid": "hello", "rank": 3, "liked": False},
     )
-    assert response.status_code == 409
+    assert response.status_code == 400
 
 
 def test_add_taste_entry_multiple_user(test_db):
@@ -312,7 +312,7 @@ def test_add_taste_entry_duplicate_rank(test_db):
         "/users/me/taste?category=top_songs",
         json={"mbid": "hello", "rank": 2, "liked": False},
     )
-    assert response.status_code == 409
+    assert response.status_code == 400
 
 
 def test_add_taste_song_limit(test_db):
