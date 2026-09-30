@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 import pytest
-from src.main import app, get_current_user
+from src.main import app
+from src.dependencies import get_current_user
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.database import Base, get_db
