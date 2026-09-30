@@ -385,6 +385,52 @@ def test_edit_entry(test_db):
     assert response.status_code == 200
 
 
+def test_edit_entry_same_mbid(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={"mbid": "hello", "rank": 3, "liked": False},
+    )
+    assert response.status_code == 200
+
+
+def test_edit_entry_same_rank(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={"rank": 2, "liked": False},
+    )
+    assert response.status_code == 200
+
+
+def test_edit_entry_change_existing_rank(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=1, user_id=1, liked=True
+    )
+    entry2 = TasteEntry(
+        mbid="hellodd", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.add(entry2)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={"rank": 2, "liked": False},
+    )
+    assert response.status_code == 409
+
+
 def test_edit_entry_one_field(test_db):
     entry = TasteEntry(
         mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
@@ -395,6 +441,20 @@ def test_edit_entry_one_field(test_db):
     response = client.patch(
         f"/users/me/taste/{entry.id}?category=top_songs",
         json={"mbid": "strisfsdfsdfng"},
+    )
+    assert response.status_code == 200
+
+
+def test_edit_entry_one_field_bool(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=2, user_id=1, liked=False
+    )
+    test_db.add(entry)
+    test_db.commit()
+    test_db.refresh(entry)
+    response = client.patch(
+        f"/users/me/taste/{entry.id}?category=top_songs",
+        json={"like": True},
     )
     assert response.status_code == 200
 

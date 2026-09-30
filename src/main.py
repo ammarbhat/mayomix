@@ -406,26 +406,32 @@ def edit_entry(
     )
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-    test = db.scalars(
-        select(TasteEntry).where(
-            TasteEntry.category == entry.category,
-            TasteEntry.user_id == current.id,
-            or_(
-                TasteEntry.mbid == edits.mbid,
-                TasteEntry.rank == edits.rank,
-            ),
-        )
-    ).first()
-    if test:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="already taken"
-        )
-    if edits.rank:
+    updates = edits.model_dump(exclude_unset=True)
+    conditions = []
+    if updates.get("mbid") is not None:
+        conditions.append(TasteEntry.mbid == updates["mbid"])
+    if updates.get("rank") is not None:
+        conditions.append(TasteEntry.rank == updates["rank"])
+
+    if conditions:
+        conflict = db.scalars(
+            select(TasteEntry).where(
+                TasteEntry.user_id == current.id,
+                TasteEntry.category == entry.category,
+                TasteEntry.id != entry.id,
+                or_(*conditions),
+            )
+        ).first()
+        if conflict:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="already taken"
+            )
+
+    if updates.get("rank") is not None:
         if not check_taste_entry(edits, entry.category):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="rank limit reached"
             )
-    updates = edits.model_dump(exclude_unset=True)
     for field, value in updates.items():
         setattr(entry, field, value)
     db.commit()
