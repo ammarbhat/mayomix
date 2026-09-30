@@ -605,7 +605,7 @@ def accept_connection(
     )
     if not connect:
         raise HTTPException(status_code=404, detail="Not found")
-    if connect.accpeted == True:
+    if connect.accepted == True:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     connect.accepted = True
     connect.connect_date = date.today()
