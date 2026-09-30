@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from src.database import Base
 from typing import List
-from datetime import datetime, date
+from datetime import date
 
 
 class User(Base):

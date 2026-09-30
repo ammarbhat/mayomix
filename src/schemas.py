@@ -1,4 +1,3 @@
-from datetime import date
 from enum import Enum
 from typing import ClassVar
 
@@ -12,7 +11,6 @@ def blank_to_none(value):
 
 
 class PatchBase(BaseModel):
-    # fields where an explicit null is treated as "not provided"
     non_nullable: ClassVar[set[str]] = set()
 
     @model_validator(mode="before")

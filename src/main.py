@@ -23,10 +23,10 @@ from src.database import get_db, Base, engine
 from sqlalchemy.exc import IntegrityError
 import httpx
 from sqlalchemy import or_, select, and_
-
-app = FastAPI()
 from dotenv import load_dotenv
 import os
+
+app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
 load_dotenv()
@@ -605,6 +605,8 @@ def accept_connection(
     )
     if not connect:
         raise HTTPException(status_code=404, detail="Not found")
+    if connect.accpeted == True:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     connect.accepted = True
     connect.connect_date = date.today()
     db.commit()
