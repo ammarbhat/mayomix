@@ -1,24 +1,59 @@
-from pydantic import BaseModel, EmailStr, Field
 from datetime import date
-from typing import Literal
 from enum import Enum
+from typing import ClassVar
+
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+
+
+def blank_to_none(value):
+    if isinstance(value, str) and value.strip() == "":
+        return None
+    return value
+
+
+class PatchBase(BaseModel):
+    # fields where an explicit null is treated as "not provided"
+    non_nullable: ClassVar[set[str]] = set()
+
+    @model_validator(mode="before")
+    @classmethod
+    def drop_nulls(cls, data):
+        if isinstance(data, dict):
+            return {
+                k: v
+                for k, v in data.items()
+                if not (v is None and k in cls.non_nullable)
+            }
+        return data
 
 
 class UserBase(BaseModel):
-    name: str
-    username: str
+    name: str = Field(min_length=1)
+    username: str = Field(min_length=1)
     bio: str | None = None
     email: EmailStr
     pfp_link: str | None = None
-    fav_genres: list
+    fav_genres: list[str] = Field(min_length=1)
+
+    @field_validator("bio", "pfp_link")
+    @classmethod
+    def clean_blank(cls, v):
+        return blank_to_none(v)
 
 
-class EditBase(BaseModel):
-    name: str | None = None
-    username: str | None = None
+class EditBase(PatchBase):
+    non_nullable = {"name", "username", "fav_genres"}
+
+    name: str | None = Field(default=None, min_length=1)
+    username: str | None = Field(default=None, min_length=1)
     bio: str | None = None
     pfp_link: str | None = None
-    fav_genres: list | None = None
+    fav_genres: list[str] | None = Field(default=None, min_length=1)
+
+    @field_validator("bio", "pfp_link")
+    @classmethod
+    def clean_blank(cls, v):
+        return blank_to_none(v)
 
 
 class Classified(BaseModel):
@@ -31,16 +66,25 @@ class TasteBase(BaseModel):
     liked: bool = False
 
 
-class EditTaste(BaseModel):
+class EditTaste(PatchBase):
+    non_nullable = {"mbid", "rank", "liked"}
+
     mbid: str | None = None
-    rank: int | None = Field(gt=0, default=None)
+    rank: int | None = Field(default=None, gt=0)
     liked: bool | None = None
 
 
 class ReviewBase(BaseModel):
-    review_str: str
+    review_str: str = Field(max_length=400)
     rating: int = Field(lt=11, gt=0)
     mbid: str
+
+
+class EditReview(PatchBase):
+    non_nullable = {"review_str", "rating"}
+
+    review_str: str | None = Field(default=None, max_length=400)
+    rating: int | None = Field(default=None, gt=0, lt=11)
 
 
 class Token(BaseModel):
@@ -57,11 +101,6 @@ class CategorySelect(str, Enum):
     top_albums = "top_albums"
     top_artists = "top_artists"
     top_genres = "top_genres"
-
-
-class EditReview(BaseModel):
-    review_str: str | None = None
-    rating: int | None = Field(gt=0, lt=11, default=None)
 
 
 class UserResponse(BaseModel):

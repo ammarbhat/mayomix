@@ -137,12 +137,21 @@ def login_for_acess_token(
 
 @app.post("/users")
 def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
-    check = db.query(User).filter(User.username == user.username).first()
+    check = db.scalars(
+        select(User).where(
+            or_(User.username == user.username, User.email == user.email)
+        )
+    ).first()
     if check:
         if check.username == user.username:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="username already exists",
+            )
+        if check.email == user.email:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="email already exists",
             )
     new_user = User(
         name=user.name,
@@ -208,7 +217,11 @@ def edit_user(
     for field, value in updates.items():
         setattr(user, field, value)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     return {"message": "Edits saved"}
 
 
@@ -434,7 +447,11 @@ def edit_entry(
             )
     for field, value in updates.items():
         setattr(entry, field, value)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     return {"message": "Note edited"}
 
 
@@ -516,7 +533,11 @@ def edit_review(
     for field, value in updates.items():
         setattr(review, field, value)
     review.updated_date = date.today()
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     return {"message": "Review edited"}
 
 
