@@ -1,9 +1,21 @@
 from fastapi import FastAPI
-from src.database import Base, engine
-
+from fastapi.middleware.cors import CORSMiddleware
 from src.routers import users, music, taste, reviews, connections, auth, activity
+from dotenv import load_dotenv
+import os
 
 app = FastAPI()
+load_dotenv()
+
+origins = os.environ["orgins"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
