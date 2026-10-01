@@ -7,7 +7,7 @@ import os
 app = FastAPI()
 load_dotenv()
 
-origins = os.environ["orgins"]
+origins = os.environ["origins"]
 
 app.add_middleware(
     CORSMiddleware,
