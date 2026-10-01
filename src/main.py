@@ -5,8 +5,6 @@ from src.routers import users, music, taste, reviews, connections, auth, activit
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
-
 
 @app.get("/")
 def root():
