@@ -3,6 +3,7 @@ name = "mayomix"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "alembic>=1.20.0",
     "fastapi[standard]>=0.141.1",
     "httpx>=0.28.1",
     "httpx2>=2.13.1",
