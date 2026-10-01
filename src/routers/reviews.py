@@ -49,11 +49,19 @@ def add_review(
 
 
 @router.get("/users/{username}/reviews")
-def get_all_reviews(username: str, db=Depends(get_db)):
+def get_all_reviews(
+    username: str, limit: int = 13, offset: int = 0, db=Depends(get_db)
+):
     usr = db.query(User).filter(User.username == username).first()
     if not usr:
         raise HTTPException(status_code=404, detail="User not found")
-    reviews = db.query(Review).filter(Review.user_id == usr.id).all()
+    reviews = (
+        db.query(Review)
+        .filter(Review.user_id == usr.id)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
     if not reviews:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
@@ -69,8 +77,16 @@ def get_review_by_id(review_id: int, db=Depends(get_db)):
 
 
 @router.get("/albums/{album_mbid}/reviews")
-def get_reviews_by_album(album_mbid: str, db=Depends(get_db)):
-    reviews = db.query(Review).filter(Review.mbid == album_mbid).all()
+def get_reviews_by_album(
+    album_mbid: str, limit: int = 13, offset: int = 0, db=Depends(get_db)
+):
+    reviews = (
+        db.query(Review)
+        .filter(Review.mbid == album_mbid)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
     if not reviews:
         raise HTTPException(status_code=404, detail="Not found")
     return reviews

@@ -12,6 +12,8 @@ router = APIRouter()
 @router.get("/activity")
 def get_activity(
     current: Annotated[User, Depends(get_current_user)],
+    limit: int = 13,
+    offset: int = 0,
     db=Depends(get_db),
 ):
     connections = (
@@ -33,7 +35,8 @@ def get_activity(
         db.query(Review)
         .filter(Review.user_id.in_(ids))
         .order_by(Review.create_date.desc())
-        .limit(7)
+        .limit(limit)
+        .offset(offset)
         .all()
     )
     if not activity:
