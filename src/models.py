@@ -47,7 +47,7 @@ class TasteEntry(Base):
     mbid: Mapped[str]
     category: Mapped[str]
     rank: Mapped[int]
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
     liked: Mapped[bool]
 
     user: Mapped["User"] = relationship(back_populates="taste_entries")
@@ -62,7 +62,7 @@ class Review(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     review_str: Mapped[str] = mapped_column(String(400))
-    mbid: Mapped[str]
+    mbid: Mapped[str] = mapped_column(index=True)
     rating: Mapped[int]
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     create_date: Mapped[date]
@@ -75,7 +75,7 @@ class Connection(Base):
     __tablename__ = "connection"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id1: Mapped[int]
-    user_id2: Mapped[int]
+    user_id1: Mapped[int] = mapped_column(index=True)
+    user_id2: Mapped[int] = mapped_column(index=True)
     accepted: Mapped[bool] = mapped_column(Boolean, default=False)
     connect_date: Mapped[date | None]

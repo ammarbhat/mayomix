@@ -22,7 +22,7 @@ from src.database import Base
 from src import models
 
 target_metadata = Base.metadata
-
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
