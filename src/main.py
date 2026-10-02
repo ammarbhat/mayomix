@@ -1,6 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routers import users, music, taste, reviews, connections, auth, activity
+from src.routers import (
+    users,
+    music,
+    taste,
+    reviews,
+    connections,
+    auth,
+    activity,
+    health,
+)
 from dotenv import load_dotenv
 import os
 
@@ -23,6 +32,7 @@ def root():
     return {"message": "Welcome to root!"}
 
 
+app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(music.router)
