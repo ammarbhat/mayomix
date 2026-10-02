@@ -808,12 +808,14 @@ def test_get_connections(test_db):
 
 def test_get_connections_not_found():
     response = client.get("/connections/me")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_get_pending_connections_not_found():
     response = client.get("/connections/me/pending")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_get_pending_connections(test_db):
@@ -826,7 +828,8 @@ def test_get_pending_connections(test_db):
 
 def test_get_sent_connections_not_found():
     response = client.get("/connections/me/sent")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_get_sent_connections(test_db):

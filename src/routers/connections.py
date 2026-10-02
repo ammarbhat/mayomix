@@ -99,8 +99,6 @@ def get_connections(
         .all()
     )
     respli = connect1 + connect2
-    if not respli:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
     return respli
 
 
@@ -113,8 +111,6 @@ def get_pending_connections(
         .filter(Connection.user_id2 == current.id, Connection.accepted == False)
         .all()
     )
-    if not connect:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     return connect
 
 
@@ -127,6 +123,4 @@ def get_sent_connections(
         .filter(Connection.user_id1 == current.id, Connection.accepted == False)
         .all()
     )
-    if not connect:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     return connect
