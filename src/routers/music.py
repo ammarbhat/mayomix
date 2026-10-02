@@ -11,6 +11,7 @@ from src.dependencies import (
 )
 import asyncio
 import time
+from src.config import settings
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ async def search_albums_endpoint(
     mod_query = f'releasegroup:"{query}" AND ({genre_string}) AND primarytype:album'
     url = "https://musicbrainz.org/ws/2/release-group/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
-    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
     async with httpx.AsyncClient() as client:
         response = await rate_limited_get(url, params=params, headers=headers)
@@ -53,7 +54,7 @@ async def search_artits(
 ):
     url = "https://musicbrainz.org/ws/2/artist/"
     params = {"query": query, "fmt": "json", "limit": limit}
-    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
     async with httpx.AsyncClient() as client:
         response = await rate_limited_get(url, params=params, headers=headers)
         return response.json()
@@ -66,7 +67,7 @@ async def search_songs(
     mod_query = f'recording:"{query}"'
     url = "https://musicbrainz.org/ws/2/recording/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
-    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
     async with httpx.AsyncClient() as client:
         response = await rate_limited_get(url, params=params, headers=headers)
         return response.json()
@@ -79,7 +80,7 @@ async def get_album(mbid: str):
         f"{mbid}?inc=genres+releases&fmt=json"
     )
 
-    headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
+    headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
     async with httpx.AsyncClient(timeout=10.0) as client:
         response = await rate_limited_get(url, headers=headers)
