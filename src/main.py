@@ -11,14 +11,12 @@ from src.routers import (
     health,
 )
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
-import os
+from src.config import settings
 
 app = FastAPI()
-load_dotenv()
 
-origins = os.environ["origins"]
+origins = settings.ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
