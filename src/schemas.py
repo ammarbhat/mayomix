@@ -99,6 +99,8 @@ class CategorySelect(str, Enum):
     top_albums = "top_albums"
     top_artists = "top_artists"
     top_genres = "top_genres"
+    rotation_song = "rotation_song"
+    rotation_album = "rotation_album"
 
 
 class UserResponse(BaseModel):

@@ -332,6 +332,22 @@ def test_add_entry_others_limit():
     assert response.status_code == 400
 
 
+def test_add_entry_rotation_song_limit_error(test_db):
+    response = client.post(
+        "/users/me/taste?category=rotation_song",
+        json={"mbid": "hello", "rank": 7, "liked": False},
+    )
+    assert response.status_code == 400
+
+
+def test_add_entry_rotation_song_limit_(test_db):
+    response = client.post(
+        "/users/me/taste?category=rotation_song",
+        json={"mbid": "hello", "rank": 6, "liked": False},
+    )
+    assert response.status_code == 400
+
+
 def test_delete_taste_entry(test_db):
     entry = TasteEntry(
         mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
