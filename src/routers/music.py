@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, APIRouter
 from src.models import User
 from typing import Annotated
 from src.database import get_db
+from typing import Annotated
 import httpx
 from pydantic import Field
 from src.dependencies import (
@@ -16,7 +17,7 @@ router = APIRouter()
 async def search_albums_endpoint(
     query: str,
     current: Annotated[User, Depends(get_current_user)],
-    limit: int = Field(default=10, gt=0, le=23),
+    limit: Annotated[int, Field(default=15, lt=25, ge=1)],
     db=Depends(get_db),
 ):
     user = db.query(User).filter(User.username == current.username).first()
@@ -32,7 +33,9 @@ async def search_albums_endpoint(
 
 
 @router.get("/search/artists")
-async def search_artits(query: str, limit: int = Field(default=6, gt=0, le=23)):
+async def search_artits(
+    query: str, limit: Annotated[int, Field(default=6, lt=25, ge=1)]
+):
     url = "https://musicbrainz.org/ws/2/artist/"
     params = {"query": query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
@@ -42,7 +45,9 @@ async def search_artits(query: str, limit: int = Field(default=6, gt=0, le=23)):
 
 
 @router.get("/search/songs")
-async def search_songs(query: str, limit: int = Field(default=10, gt=0, le=23)):
+async def search_songs(
+    query: str, limit: Annotated[int, Field(default=10, lt=25, ge=1)]
+):
     mod_query = f'recording:"{query}"'
     url = "https://musicbrainz.org/ws/2/recording/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
