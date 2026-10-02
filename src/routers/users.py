@@ -110,7 +110,6 @@ def edit_user(
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     return {"message": "Edits saved"}
 
 

@@ -42,9 +42,6 @@ def add_review(
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Review already exists"
-        )
     return {"message": "Review added"}
 
 
@@ -113,7 +110,6 @@ def edit_review(
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
     return {"message": "Review edited"}
 
 

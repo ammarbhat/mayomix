@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from src.routers import (
     users,
@@ -10,7 +10,9 @@ from src.routers import (
     activity,
     health,
 )
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+from sqlalchemy.exc import IntegrityError
 import os
 
 app = FastAPI()
@@ -25,6 +27,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_exception_handler(request: Request, exc: IntegrityError):
+    return JSONResponse(
+        status_code=409, content={"detail": "This conflicts with existing data."}
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500, content={"detail": "Something went wrong. Please try again."}
+    )
 
 
 @app.get("/")
