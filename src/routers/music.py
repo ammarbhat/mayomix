@@ -9,8 +9,23 @@ from src.dependencies import (
     genre_tag_string,
     get_current_user,
 )
+import asyncio
+import time
 
 router = APIRouter()
+
+
+musicbrainz_semaphore = asyncio.Semaphore(1)
+
+
+async def rate_limited_get(client: httpx.AsyncClient, url: str, **kwargs):
+    async with musicbrainz_semaphore:
+        start = time.monotonic()
+        response = await client.get(url, **kwargs)
+        elapsed = time.monotonic() - start
+        if elapsed < 1.0:
+            await asyncio.sleep(1.0 - elapsed)
+        return response
 
 
 @router.get("/search/albums")
@@ -28,7 +43,7 @@ async def search_albums_endpoint(
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
 
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params, headers=headers)
+        response = await rate_limited_get(url, params=params, headers=headers)
         return response.json()
 
 
@@ -40,7 +55,7 @@ async def search_artits(
     params = {"query": query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params, headers=headers)
+        response = await rate_limited_get(url, params=params, headers=headers)
         return response.json()
 
 
@@ -53,7 +68,7 @@ async def search_songs(
     params = {"query": mod_query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params, headers=headers)
+        response = await rate_limited_get(url, params=params, headers=headers)
         return response.json()
 
 
@@ -67,7 +82,7 @@ async def get_album(mbid: str):
     headers = {"User-Agent": "mayo-mix/0.1 (https://github.com/ammarbhat)"}
 
     async with httpx.AsyncClient(timeout=10.0) as client:
-        response = await client.get(url, headers=headers)
+        response = await rate_limited_get(url, headers=headers)
 
         if response.status_code != 200:
             raise HTTPException(
