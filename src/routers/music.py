@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, APIRouter
-from src.models import User
+from src.models import User, CachedEntity
 from typing import Annotated
 from src.database import get_db
 from typing import Annotated
@@ -12,11 +12,13 @@ from src.dependencies import (
 import asyncio
 import time
 from src.config import settings
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter()
 
 
 musicbrainz_semaphore = asyncio.Semaphore(1)
+CACHE_TTL = timedelta(days=13)
 
 
 async def rate_limited_get(client: httpx.AsyncClient, url: str, **kwargs):
@@ -74,11 +76,14 @@ async def search_songs(
 
 
 @router.get("/albums/{mbid}")
-async def get_album(mbid: str):
+async def get_album(mbid: str, db=Depends(get_db)):
     url = (
         f"https://musicbrainz.org/ws/2/release-group/"
         f"{mbid}?inc=genres+releases&fmt=json"
     )
+    cached = db.query(CachedEntity).filter(CachedEntity.mbid == mbid).first()
+    if cached and (datetime.now(timezone.utc) - cached.fetched_at) < CACHE_TTL:
+        return cached.data
 
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
@@ -101,4 +106,14 @@ async def get_album(mbid: str):
         if cover_response.status_code == 404:
             cover_url = None
 
+    if cached:
+        cached.data = album_meta
+        cached.fetched_at = datetime.now(timezone.utc)
+    else:
+        db.add(
+            CachedEntity(
+                mbid=mbid, data=album_meta, fetched_at=datetime.now(timezone.utc)
+            )
+        )
+    db.commit()
     return {"meta": album_meta, "cover_url": cover_url}

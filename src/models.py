@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from src.database import Base
 from typing import List
-from datetime import date
+from datetime import date, datetime
 
 
 class User(Base):
@@ -79,3 +79,12 @@ class Connection(Base):
     user_id2: Mapped[int] = mapped_column(index=True)
     accepted: Mapped[bool] = mapped_column(Boolean, default=False)
     connect_date: Mapped[date | None]
+
+
+class CachedEntity(Base):
+    __tablename__ = "cached_album"
+
+    mbid: Mapped[str] = mapped_column(primary_key=True)
+    data: Mapped[dict] = mapped_column(JSON)
+    entity_type: Mapped[str]
+    fetched_date: Mapped[datetime]
