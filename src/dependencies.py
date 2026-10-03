@@ -24,9 +24,9 @@ def check_taste_entry(entry, category):
     elif category == "rotation_song":
         if entry.rank > 6:
             return False
+    elif entry.rank > 3:
+        return False
     else:
-        if entry.rank > 3:
-            return False
         return True
 
 

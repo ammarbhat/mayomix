@@ -85,8 +85,6 @@ async def get_album(mbid: str, db=Depends(get_db)):
         f"{mbid}?inc=genres+releases&fmt=json"
     )
     cached = db.query(CachedEntity).filter(CachedEntity.mbid == mbid).first()
-    if cached and (datetime.now(timezone.utc) - cached.fetched_date) < CACHE_TTL:
-        return cached.data
 
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
@@ -108,7 +106,8 @@ async def get_album(mbid: str, db=Depends(get_db)):
 
         if cover_response.status_code == 404:
             cover_url = None
-
+    if cached and (datetime.now(timezone.utc) - cached.fetched_date) < CACHE_TTL:
+        return {"meta": cached.data, "cover_url": cover_url}
     if cached:
         cached.data = album_meta
         cached.fetched_at = datetime.now(timezone.utc)
