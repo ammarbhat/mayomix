@@ -82,7 +82,7 @@ async def get_album(mbid: str, db=Depends(get_db)):
         f"{mbid}?inc=genres+releases&fmt=json"
     )
     cached = db.query(CachedEntity).filter(CachedEntity.mbid == mbid).first()
-    if cached and (datetime.now(timezone.utc) - cached.fetched_at) < CACHE_TTL:
+    if cached and (datetime.now(timezone.utc) - cached.fetched_date) < CACHE_TTL:
         return cached.data
 
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
@@ -112,7 +112,7 @@ async def get_album(mbid: str, db=Depends(get_db)):
     else:
         db.add(
             CachedEntity(
-                mbid=mbid, data=album_meta, fetched_at=datetime.now(timezone.utc)
+                mbid=mbid, data=album_meta, fetched_date=datetime.now(timezone.utc)
             )
         )
     db.commit()
