@@ -45,9 +45,10 @@ async def search_albums_endpoint(
     params = {"query": mod_query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
-    async with httpx.AsyncClient() as client:
-        response = await rate_limited_get(url, params=params, headers=headers)
-        return response.json()
+    response = await rate_limited_get(
+        httpx.AsyncClient(), url, params=params, headers=headers
+    )
+    return response.json()
 
 
 @router.get("/search/artists")
@@ -57,9 +58,10 @@ async def search_artits(
     url = "https://musicbrainz.org/ws/2/artist/"
     params = {"query": query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
-    async with httpx.AsyncClient() as client:
-        response = await rate_limited_get(url, params=params, headers=headers)
-        return response.json()
+    response = await rate_limited_get(
+        httpx.AsyncClient(), url, params=params, headers=headers
+    )
+    return response.json()
 
 
 @router.get("/search/songs")
@@ -70,9 +72,10 @@ async def search_songs(
     url = "https://musicbrainz.org/ws/2/recording/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
-    async with httpx.AsyncClient() as client:
-        response = await rate_limited_get(url, params=params, headers=headers)
-        return response.json()
+    response = await rate_limited_get(
+        httpx.AsyncClient(), url, params=params, headers=headers
+    )
+    return response.json()
 
 
 @router.get("/albums/{mbid}")
@@ -88,7 +91,7 @@ async def get_album(mbid: str, db=Depends(get_db)):
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
     async with httpx.AsyncClient(timeout=10.0) as client:
-        response = await rate_limited_get(url, headers=headers)
+        response = await rate_limited_get(httpx.AsyncClient(), url, headers=headers)
 
         if response.status_code != 200:
             raise HTTPException(
