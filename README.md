@@ -221,7 +221,3 @@ The activity feed is built from reviews and accepted connections at request time
 Music metadata: MusicBrainz
 
 Album artwork: Cover Art Archive
-
-## License
-
-No license file is currently included in the repository.
