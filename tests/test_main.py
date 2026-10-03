@@ -345,7 +345,7 @@ def test_add_entry_rotation_song_limit_(test_db):
         "/users/me/taste?category=rotation_song",
         json={"mbid": "hello", "rank": 6, "liked": False},
     )
-    assert response.status_code == 400
+    assert response.status_code == 200
 
 
 def test_delete_taste_entry(test_db):
