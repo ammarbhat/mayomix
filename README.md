@@ -203,7 +203,6 @@ The activity feed is built from reviews and accepted connections at request time
 - MusicBrainz search responses are returned in the upstream JSON shape rather than a custom normalized schema.
 - The connection relationship is intentionally represented with two user IDs rather than ORM foreign-key relationships to the user table.
 - Search results are not currently cached.
-- Cached album hits currently return the cached `data` object directly, while a fresh fetch returns `{meta, cover_url}`.
 - There is no dedicated connection-status endpoint; profile UIs need to derive status from accepted, pending, and sent connection collections.
 
 ## Roadmap
