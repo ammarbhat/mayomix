@@ -22,6 +22,17 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --frozen
+        
+      - name: Create .env for CI
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "ALGORITHM=HS256" >> .env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> .env
+          echo "ORIGINS=[\"http://localhost:5173\"]" >> .env
+          echo "MUSICBRAINZ_USER_AGENT=mayo-mix-ci/0.1" >> .env
 
+      - name: Run tests
+        run: uv run pytest
       - name: Run tests
         run: uv run pytest
