@@ -137,3 +137,18 @@ def edit_entry(
     except IntegrityError:
         db.rollback()
     return {"message": "Note edited"}
+
+
+@router.get("/me/taste/liked")
+def get_liked_songs(
+    current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
+):
+    liked_list = db.scalars(select(TasteEntry).where(TasteEntry.liked == True)).all()
+    resp = []
+    for item in liked_list:
+        if item.user_id == current.id:
+            resp.append(item)
+    if resp:
+        return resp
+    else:
+        return {"message": "No liked songs"}

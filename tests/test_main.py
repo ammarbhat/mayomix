@@ -448,6 +448,26 @@ def test_edit_entry_change_existing_rank(test_db):
     assert response.status_code == 409
 
 
+def test_get_liked(test_db):
+    entry = TasteEntry(
+        mbid="hello", category="top_songs", rank=1, user_id=1, liked=True
+    )
+    entry2 = TasteEntry(
+        mbid="hellodd", category="top_songs", rank=2, user_id=1, liked=True
+    )
+    test_db.add(entry)
+    test_db.add(entry2)
+    test_db.commit()
+    response = client.get(f"/users/me/taste/liked")
+    assert response.status_code == 200
+
+
+def test_get_liked_none(test_db):
+    response = client.get(f"/users/me/taste/liked")
+    assert response.status_code == 200
+    assert response.json() == {"message": "No liked songs"}
+
+
 def test_edit_entry_one_field(test_db):
     entry = TasteEntry(
         mbid="hello", category="top_songs", rank=2, user_id=1, liked=True
