@@ -168,6 +168,18 @@ def test_get_user_by_username_not_found():
     assert response.status_code == 404
 
 
+def test_search_users_not_found():
+    response = client.get("/users/search?username=ammar")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_search_users():
+    response = client.get("/users/search?username=testusr")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+
+
 def test_edit_user(test_db):
 
     response = client.patch(
