@@ -58,17 +58,10 @@ def search_users(
     username: str,
     db=Depends(get_db),
 ):
-    user = db.query(User).filter(User.username == username).first()
     results = []
-    searches = db.scalars(select(User).where(User.username.contains(username))).all()
-    if user:
-        res = UserResponse(
-            username=user.username,
-            pfp_link=user.pfp_link,
-            name=user.name,
-            fav_genres=user.fav_genres,
-        )
-        results.append(res)
+    searches = db.scalars(
+        select(User).where(User.username.contains(username)).limit(20)
+    ).all()
     for u in searches:
         results.append(
             UserResponse(
