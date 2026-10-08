@@ -53,6 +53,34 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
     return {"message": "User added!"}
 
 
+@router.get("/search")
+def search_users(
+    username: str,
+    db=Depends(get_db),
+):
+    user = db.query(User).filter(User.username == username).first()
+    results = []
+    searches = db.scalars(select(User).where(User.username.contains(username))).all()
+    if user:
+        res = UserResponse(
+            username=user.username,
+            pfp_link=user.pfp_link,
+            name=user.name,
+            fav_genres=user.fav_genres,
+        )
+        results.append(res)
+    for u in searches:
+        results.append(
+            UserResponse(
+                username=u.username,
+                pfp_link=u.pfp_link,
+                name=u.name,
+                fav_genres=u.fav_genres,
+            )
+        )
+    return results
+
+
 @router.get("/me")
 def get_me(current: Annotated[User, Depends(get_current_user)]):
     user = UserBase(
