@@ -38,9 +38,9 @@ async def search_albums_endpoint(
     limit: Annotated[int, Field(default=15, lt=25, ge=1)],
     db=Depends(get_db),
 ):
-    user = db.query(User).filter(User.username == current.username).first()
-    genre_string = genre_tag_string(user.fav_genres)
-    mod_query = f'releasegroup:"{query}" AND ({genre_string}) AND primarytype:album'
+    # user = db.query(User).filter(User.username == current.username).first()
+    # genre_string = genre_tag_string(user.fav_genres)
+    mod_query = f'releasegroup:"{query}" AND primarytype:album'
     url = "https://musicbrainz.org/ws/2/release-group/"
     params = {"query": mod_query, "fmt": "json", "limit": limit}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
