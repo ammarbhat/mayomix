@@ -124,3 +124,36 @@ def get_sent_connections(
         .all()
     )
     return connect
+
+
+@router.get("/me/status/{username}")
+def check_connection_status(
+    username: str,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    con1 = db.scalars(
+        select(Connection).where(
+            Connection.user_id1 == current.id, Connection.user_id2 == user.id
+        )
+    ).first()
+    con2 = db.scalars(
+        select(Connection).where(
+            Connection.user_id1 == user.id, Connection.user_id2 == current.id
+        )
+    ).first()
+    if not con1 and not con2:
+        return "not_found"
+    elif con1:
+        if con1.accepted == True:
+            return "connected"
+        elif con1.accepted == False:
+            return "pending_sent"
+    elif con2:
+        if con2.accepted == True:
+            return "connected"
+        elif con2.accepted == False:
+            return "pending_recieved"

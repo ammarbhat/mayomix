@@ -888,6 +888,74 @@ def test_get_sent_connections(test_db):
     assert response.status_code == 200
 
 
+def test_get_connection_status_pending_sent(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(user_id1=1, user_id2=test_user.id, accepted=False)
+    test_db.add(test_con)
+    test_db.commit()
+    response = client.get(f"/connections/me/status/{test_user.username}")
+    assert response.status_code == 200
+    assert response.json() == "pending_sent"
+
+
+def test_get_connection_status_pending_recieved(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(user_id1=test_user.id, user_id2=1, accepted=False)
+    test_db.add(test_con)
+    test_db.commit()
+    response = client.get(f"/connections/me/status/{test_user.username}")
+    assert response.status_code == 200
+    assert response.json() == "pending_recieved"
+
+
+def test_get_connection_status_not_found(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    response = client.get(f"/connections/me/status/{test_user.username}")
+    assert response.status_code == 200
+    assert response.json() == "not_found"
+
+
+def test_get_connection_status_user_not_found(test_db):
+    response = client.get(f"/connections/me/status/ammar")
+    assert response.status_code == 404
+
+
 def test_activity_not_found():
     response = client.get("/activity")
     assert response.status_code == 404
