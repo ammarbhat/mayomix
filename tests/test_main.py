@@ -929,7 +929,7 @@ def test_get_connection_status_pending_recieved(test_db):
     test_db.commit()
     response = client.get(f"/connections/me/status/{test_user.username}")
     assert response.status_code == 200
-    assert response.json() == "pending_recieved"
+    assert response.json() == "pending_received"
 
 
 def test_get_connection_status_not_found(test_db):

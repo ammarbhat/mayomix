@@ -156,4 +156,4 @@ def check_connection_status(
         if con2.accepted == True:
             return "connected"
         elif con2.accepted == False:
-            return "pending_recieved"
+            return "pending_received"
