@@ -28,7 +28,7 @@ class PatchBase(BaseModel):
 class UserBase(BaseModel):
     name: str = Field(min_length=1)
     username: str = Field(min_length=1)
-    bio: str | None = None
+    bio: str | None = Field(default=None, max_length=100)
     email: EmailStr
     pfp_link: str | None = None
     fav_genres: list[str] = Field(min_length=1)
@@ -44,7 +44,7 @@ class EditBase(PatchBase):
 
     name: str | None = Field(default=None, min_length=1)
     username: str | None = Field(default=None, min_length=1)
-    bio: str | None = None
+    bio: str | None = Field(default=None, max_length=100)
     pfp_link: str | None = None
     fav_genres: list[str] | None = Field(default=None, min_length=1)
 
