@@ -1,9 +1,6 @@
 from fastapi import Depends, HTTPException, status, APIRouter
 from src.models import User, Review
-from src.schemas import (
-    ReviewBase,
-    EditReview,
-)
+from src.schemas import ReviewBase, EditReview, ReviewResponse
 from datetime import date
 from typing import Annotated
 from src.database import get_db
@@ -62,7 +59,19 @@ def get_all_reviews(
 
     if not reviews:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-    return reviews
+    response = []
+    for review in reviews:
+        response.append(
+            ReviewResponse(
+                review_str=review.review_str,
+                rating=review.rating,
+                mbid=review.mbid,
+                username=username,
+                create_date=review.create_date,
+                updated_date=review.updated_date,
+            )
+        )
+    return response
 
 
 @router.get("/reviews/{review_id}")
@@ -70,7 +79,16 @@ def get_review_by_id(review_id: int, db=Depends(get_db)):
     review = db.query(Review).filter(Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="Not found")
-    return review
+    user = db.query(User).filter(User.id == review.user_id).first()
+    response = ReviewResponse(
+        review_str=review.review_str,
+        rating=review.rating,
+        mbid=review.mbid,
+        username=user.username,
+        create_date=review.create_date,
+        updated_date=review.updated_date,
+    )
+    return response
 
 
 @router.get("/albums/{album_mbid}/reviews")
@@ -86,7 +104,20 @@ def get_reviews_by_album(
     )
     if not reviews:
         raise HTTPException(status_code=404, detail="Not found")
-    return reviews
+    response = []
+    for review in reviews:
+        user = db.query(User).filter(User.id == review.user_id).first()
+        response.append(
+            ReviewResponse(
+                review_str=review.review_str,
+                rating=review.rating,
+                mbid=review.mbid,
+                username=user.username,
+                create_date=review.create_date,
+                updated_date=review.updated_date,
+            )
+        )
+    return response
 
 
 @router.patch("/users/me/reviews/{review_id}")

@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import ClassVar
-
+from datetime import date
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 
@@ -109,3 +109,9 @@ class UserResponse(BaseModel):
     bio: str | None = None
     pfp_link: str | None = None
     fav_genres: list
+
+
+class ReviewResponse(ReviewBase):
+    username: str
+    create_date: date
+    updated_date: date | None = None
