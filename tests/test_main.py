@@ -867,7 +867,20 @@ def test_get_pending_connections_not_found():
 
 
 def test_get_pending_connections(test_db):
-    test_con = Connection(user_id1=6, user_id2=1)
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(user_id1=13, user_id2=test_user.id)
     test_db.add(test_con)
     test_db.commit()
     response = client.get("/connections/me/pending")
@@ -881,7 +894,20 @@ def test_get_sent_connections_not_found():
 
 
 def test_get_sent_connections(test_db):
-    test_con = Connection(user_id1=1, user_id2=13)
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(user_id1=test_user.id, user_id2=13)
     test_db.add(test_con)
     test_db.commit()
     response = client.get("/connections/me/sent")

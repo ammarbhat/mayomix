@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status, APIRouter
 from src.models import User, Connection
-
+from src.schemas import ConnectionResponse
 from datetime import date
 from typing import Annotated
 from src.database import get_db
@@ -111,7 +111,20 @@ def get_pending_connections(
         .filter(Connection.user_id2 == current.id, Connection.accepted == False)
         .all()
     )
-    return connect
+    response = []
+    if len(connect) != 0:
+        for con in connect:
+            user = db.query(User).filter(User.id == con.user_id1).first()
+            response.append(
+                ConnectionResponse(
+                    con_id=con.id,
+                    user_id=con.user_id1,
+                    name=user.name,
+                    username=user.username,
+                    pfp_link=user.pfp_link,
+                )
+            )
+    return response
 
 
 @router.get("/me/sent")
@@ -123,7 +136,19 @@ def get_sent_connections(
         .filter(Connection.user_id1 == current.id, Connection.accepted == False)
         .all()
     )
-    return connect
+    response = []
+    for con in connect:
+        user = db.query(User).filter(User.id == con.user_id2).first()
+        response.append(
+            ConnectionResponse(
+                con_id=con.id,
+                user_id=con.user_id2,
+                name=user.name,
+                username=user.username,
+                pfp_link=user.pfp_link,
+            )
+        )
+    return response
 
 
 @router.get("/me/status/{username}")

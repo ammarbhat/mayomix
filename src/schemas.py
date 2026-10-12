@@ -115,3 +115,11 @@ class ReviewResponse(ReviewBase):
     username: str
     create_date: date
     updated_date: date | None = None
+
+
+class ConnectionResponse(BaseModel):
+    con_id: int
+    user_id: int
+    name: str
+    username: str
+    pfp_link: str | None = None
