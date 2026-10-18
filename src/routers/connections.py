@@ -171,14 +171,14 @@ def check_connection_status(
         )
     ).first()
     if not con1 and not con2:
-        return "not_found"
+        return {"status": "not_found"}
     elif con1:
         if con1.accepted == True:
-            return "connected"
+            return {"status": "connected"}
         elif con1.accepted == False:
-            return "pending_sent"
+            return {"status": "pending_sent"}
     elif con2:
         if con2.accepted == True:
-            return "connected"
+            return {"status": "connected"}
         elif con2.accepted == False:
-            return "pending_received"
+            return {"status": "pending_received"}
