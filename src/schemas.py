@@ -112,6 +112,7 @@ class UserResponse(BaseModel):
 
 
 class ReviewResponse(ReviewBase):
+    id: int
     username: str
     create_date: date
     updated_date: date | None = None

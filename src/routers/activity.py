@@ -45,6 +45,7 @@ def get_activity(
         user = db.query(User).filter(User.id == review.user_id).first()
         response.append(
             ReviewResponse(
+                id=review.id,
                 review_str=review.review_str,
                 mbid=review.mbid,
                 rating=review.rating,

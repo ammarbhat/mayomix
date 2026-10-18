@@ -43,7 +43,7 @@ def add_review(
     return {"message": "Review added"}
 
 
-@router.get("/users/{username}/reviews")
+@router.get("/users/{username}/reviews", response_model=list[ReviewResponse])
 def get_all_reviews(
     username: str, limit: int = 13, offset: int = 0, db=Depends(get_db)
 ):
@@ -53,6 +53,7 @@ def get_all_reviews(
     reviews = (
         db.query(Review)
         .filter(Review.user_id == usr.id)
+        .order_by(Review.create_date.desc())
         .offset(offset)
         .limit(limit)
         .all()
@@ -61,6 +62,7 @@ def get_all_reviews(
     for review in reviews:
         response.append(
             ReviewResponse(
+                id=review.id,
                 review_str=review.review_str,
                 rating=review.rating,
                 mbid=review.mbid,
@@ -72,13 +74,14 @@ def get_all_reviews(
     return response
 
 
-@router.get("/reviews/{review_id}")
+@router.get("/reviews/{review_id}", response_model=ReviewResponse)
 def get_review_by_id(review_id: int, db=Depends(get_db)):
     review = db.query(Review).filter(Review.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="Not found")
     user = db.query(User).filter(User.id == review.user_id).first()
     response = ReviewResponse(
+        id=review.id,
         review_str=review.review_str,
         rating=review.rating,
         mbid=review.mbid,
@@ -89,13 +92,14 @@ def get_review_by_id(review_id: int, db=Depends(get_db)):
     return response
 
 
-@router.get("/albums/{album_mbid}/reviews")
+@router.get("/albums/{album_mbid}/reviews", response_model=list[ReviewResponse])
 def get_reviews_by_album(
     album_mbid: str, limit: int = 13, offset: int = 0, db=Depends(get_db)
 ):
     reviews = (
         db.query(Review)
         .filter(Review.mbid == album_mbid)
+        .order_by(Review.create_date.desc())
         .offset(offset)
         .limit(limit)
         .all()
@@ -105,6 +109,7 @@ def get_reviews_by_album(
         user = db.query(User).filter(User.id == review.user_id).first()
         response.append(
             ReviewResponse(
+                id=review.id,
                 review_str=review.review_str,
                 rating=review.rating,
                 mbid=review.mbid,
