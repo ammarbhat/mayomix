@@ -599,7 +599,8 @@ def test_add_review_invalid():
 
 def test_get_user_reviews_not_found():
     response = client.get(f"/users/testusr/reviews")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_get_user_reviews(test_db):
@@ -624,7 +625,8 @@ def test_get_user_reviews_user_not_found():
 
 def test_get_album_reviews_not_found():
     response = client.get(f"/albums/hey/reviews")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_get_album_reviews(test_db):

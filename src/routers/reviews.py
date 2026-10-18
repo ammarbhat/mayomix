@@ -57,9 +57,6 @@ def get_all_reviews(
         .limit(limit)
         .all()
     )
-
-    if not reviews:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
     response = []
     for review in reviews:
         response.append(
@@ -103,8 +100,6 @@ def get_reviews_by_album(
         .limit(limit)
         .all()
     )
-    if not reviews:
-        raise HTTPException(status_code=404, detail="Not found")
     response = []
     for review in reviews:
         user = db.query(User).filter(User.id == review.user_id).first()
