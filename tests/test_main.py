@@ -936,7 +936,7 @@ def test_get_connection_status_pending_sent(test_db):
     test_db.commit()
     response = client.get(f"/connections/me/status/{test_user.username}")
     assert response.status_code == 200
-    assert response.json() == "pending_sent"
+    assert response.json() == {"status": "pending_sent"}
 
 
 def test_get_connection_status_pending_recieved(test_db):
@@ -958,7 +958,7 @@ def test_get_connection_status_pending_recieved(test_db):
     test_db.commit()
     response = client.get(f"/connections/me/status/{test_user.username}")
     assert response.status_code == 200
-    assert response.json() == "pending_received"
+    assert response.json() == {"status": "pending_received"}
 
 
 def test_get_connection_status_not_found(test_db):
@@ -977,7 +977,7 @@ def test_get_connection_status_not_found(test_db):
     test_db.refresh(test_user)
     response = client.get(f"/connections/me/status/{test_user.username}")
     assert response.status_code == 200
-    assert response.json() == "not_found"
+    assert response.json() == {"status": "not_found"}
 
 
 def test_get_connection_status_user_not_found(test_db):
