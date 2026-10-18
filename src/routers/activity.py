@@ -3,6 +3,7 @@ from src.models import User, Review, Connection
 from typing import Annotated
 from src.database import get_db
 from src.schemas import ReviewResponse
+from pydantic import Field
 from src.dependencies import (
     get_current_user,
 )
@@ -13,8 +14,8 @@ router = APIRouter()
 @router.get("/activity", response_model=list[ReviewResponse])
 def get_activity(
     current: Annotated[User, Depends(get_current_user)],
-    limit: int = 13,
-    offset: int = 0,
+    limit: Annotated[int, Field(default=13, gt=13, lt=30)],
+    offset: Annotated[int, Field(default=0, gt=0)],
     db=Depends(get_db),
 ):
     connections = (

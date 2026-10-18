@@ -5,6 +5,7 @@ from datetime import date
 from typing import Annotated
 from src.database import get_db
 from sqlalchemy.exc import IntegrityError
+from pydantic import Field
 from src.dependencies import (
     get_current_user,
 )
@@ -45,7 +46,10 @@ def add_review(
 
 @router.get("/users/{username}/reviews", response_model=list[ReviewResponse])
 def get_all_reviews(
-    username: str, limit: int = 13, offset: int = 0, db=Depends(get_db)
+    username: str,
+    limit: Annotated[int, Field(default=13, gt=13, lt=30)],
+    offset: Annotated[int, Field(default=0, gt=0)],
+    db=Depends(get_db),
 ):
     usr = db.query(User).filter(User.username == username).first()
     if not usr:
@@ -94,7 +98,10 @@ def get_review_by_id(review_id: int, db=Depends(get_db)):
 
 @router.get("/albums/{album_mbid}/reviews", response_model=list[ReviewResponse])
 def get_reviews_by_album(
-    album_mbid: str, limit: int = 13, offset: int = 0, db=Depends(get_db)
+    album_mbid: str,
+    limit: Annotated[int, Field(default=13, gt=13, lt=30)],
+    offset: Annotated[int, Field(default=0, gt=0)],
+    db=Depends(get_db),
 ):
     reviews = (
         db.query(Review)
