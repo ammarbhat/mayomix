@@ -598,7 +598,7 @@ def test_add_review_invalid():
 
 
 def test_get_user_reviews_not_found():
-    response = client.get(f"/users/testusr/reviews")
+    response = client.get(f"/users/testusr/reviews?limit=14&offset=0")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -614,17 +614,17 @@ def test_get_user_reviews(test_db):
     test_db.add(review)
     test_db.commit()
 
-    response = client.get(f"/users/testusr/reviews")
+    response = client.get(f"/users/testusr/reviews?limit=14&offset=0")
     assert response.status_code == 200
 
 
 def test_get_user_reviews_user_not_found():
-    response = client.get(f"/users/jinglemster/reviews")
+    response = client.get(f"/users/jinglemster/reviews?limit=14&offset=0")
     assert response.status_code == 404
 
 
 def test_get_album_reviews_not_found():
-    response = client.get(f"/albums/hey/reviews")
+    response = client.get(f"/albums/hey/reviews?limit=14&offset=0")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -640,7 +640,7 @@ def test_get_album_reviews(test_db):
     test_db.add(review)
     test_db.commit()
 
-    response = client.get("/albums/heyheyhey/reviews")
+    response = client.get("/albums/heyheyhey/reviews?limit=14&offset=0")
     assert response.status_code == 200
 
 
@@ -986,7 +986,7 @@ def test_get_connection_status_user_not_found(test_db):
 
 
 def test_activity_not_found():
-    response = client.get("/activity")
+    response = client.get("/activity?limit=14&offset=0")
     assert response.status_code == 404
 
 
@@ -1016,5 +1016,5 @@ def test_activty(test_db):
     )
     test_db.add(review)
     test_db.commit()
-    response = client.get("/activity")
+    response = client.get("/activity?limit=14&offset=0")
     assert response.status_code == 200

@@ -141,7 +141,11 @@ def edit_entry(
 def get_liked_songs(
     current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
-    liked_list = db.scalars(select(TasteEntry).where(TasteEntry.liked == True)).all()
+    liked_list = db.scalars(
+        select(TasteEntry).where(
+            TasteEntry.liked == True, TasteEntry.user_id == current.id
+        )
+    ).all()
     resp = []
     for item in liked_list:
         if item.user_id == current.id:

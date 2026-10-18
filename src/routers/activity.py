@@ -14,8 +14,8 @@ router = APIRouter()
 @router.get("/activity", response_model=list[ReviewResponse])
 def get_activity(
     current: Annotated[User, Depends(get_current_user)],
-    limit: Annotated[int, Field(default=13, gt=13, lt=30)],
-    offset: Annotated[int, Field(default=0, gt=0)],
+    limit: Annotated[int, Field(default=13, gt=12, lt=30)],
+    offset: Annotated[int, Field(default=0, ge=0)],
     db=Depends(get_db),
 ):
     connections = (

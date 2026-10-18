@@ -47,8 +47,8 @@ def add_review(
 @router.get("/users/{username}/reviews", response_model=list[ReviewResponse])
 def get_all_reviews(
     username: str,
-    limit: Annotated[int, Field(default=13, gt=13, lt=30)],
-    offset: Annotated[int, Field(default=0, gt=0)],
+    limit: Annotated[int, Field(default=13, gt=12, lt=30)],
+    offset: Annotated[int, Field(default=0, ge=0)],
     db=Depends(get_db),
 ):
     usr = db.query(User).filter(User.username == username).first()
@@ -99,8 +99,8 @@ def get_review_by_id(review_id: int, db=Depends(get_db)):
 @router.get("/albums/{album_mbid}/reviews", response_model=list[ReviewResponse])
 def get_reviews_by_album(
     album_mbid: str,
-    limit: Annotated[int, Field(default=13, gt=13, lt=30)],
-    offset: Annotated[int, Field(default=0, gt=0)],
+    limit: Annotated[int, Field(default=13, gt=12, lt=30)],
+    offset: Annotated[int, Field(default=0, ge=0)],
     db=Depends(get_db),
 ):
     reviews = (
