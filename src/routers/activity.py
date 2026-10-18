@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status, APIRouter
 from src.models import User, Review, Connection
 from typing import Annotated
 from src.database import get_db
+from src.schemas import ReviewResponse
 from src.dependencies import (
     get_current_user,
 )
@@ -9,7 +10,7 @@ from src.dependencies import (
 router = APIRouter()
 
 
-@router.get("/activity")
+@router.get("/activity", response_model=list[ReviewResponse])
 def get_activity(
     current: Annotated[User, Depends(get_current_user)],
     limit: int = 13,
@@ -39,6 +40,19 @@ def get_activity(
         .offset(offset)
         .all()
     )
+    response = []
+    for review in activity:
+        user = db.query(User).filter(User.id == review.user_id).first()
+        response.append(
+            ReviewResponse(
+                review_str=review.review_str,
+                mbid=review.mbid,
+                rating=review.rating,
+                create_date=review.create_date,
+                updated_date=review.updated_date,
+                username=user.username,
+            )
+        )
     if not activity:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
-    return activity
+    return response
