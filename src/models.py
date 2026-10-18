@@ -86,5 +86,5 @@ class CachedEntity(Base):
 
     mbid: Mapped[str] = mapped_column(primary_key=True)
     data: Mapped[dict] = mapped_column(JSON)
-    entity_type: Mapped[str]
+    entity_type: Mapped[str | None]
     fetched_date: Mapped[datetime]
