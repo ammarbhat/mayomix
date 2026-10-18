@@ -131,6 +131,7 @@ def edit_user(
         db.commit()
     except IntegrityError:
         db.rollback()
+        raise HTTPException(status_code=409, detail="conflict")
     return {"message": "Edits saved"}
 
 

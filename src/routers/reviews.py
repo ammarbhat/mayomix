@@ -39,6 +39,7 @@ def add_review(
         db.commit()
     except IntegrityError:
         db.rollback()
+        raise HTTPException(status_code=409, detail="conflict")
     return {"message": "Review added"}
 
 
@@ -141,6 +142,7 @@ def edit_review(
         db.commit()
     except IntegrityError:
         db.rollback()
+        raise HTTPException(status_code=409, detail="conflict")
     return {"message": "Review edited"}
 
 

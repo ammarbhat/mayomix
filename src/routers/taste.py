@@ -54,6 +54,7 @@ def add_taste_entry(
         db.commit()
     except IntegrityError:
         db.rollback()
+        raise HTTPException(status_code=409, detail="conflict")
     return {"message": "Entry added"}
 
 
@@ -136,6 +137,7 @@ def edit_entry(
         db.commit()
     except IntegrityError:
         db.rollback()
+        raise HTTPException(status_code=409, detail="conflict")
     return {"message": "Note edited"}
 
 
