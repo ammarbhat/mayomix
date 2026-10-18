@@ -84,10 +84,6 @@ def get_user_entries(username: str, category: CategorySelect, db=Depends(get_db)
         .filter(TasteEntry.category == category, TasteEntry.user_id == user.id)
         .all()
     )
-    if not taste_entries:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No entries found"
-        )
     return taste_entries
 
 

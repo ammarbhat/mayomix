@@ -389,7 +389,8 @@ def test_get_user_entries(test_db):
 
 def test_get_user_entries_not_found():
     response = client.get(f"/users/testusr/taste?category=top_songs")
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == []
 
 
 def test_edit_entry_not_found():
