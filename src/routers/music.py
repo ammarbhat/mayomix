@@ -88,7 +88,14 @@ async def get_album(mbid: str, db=Depends(get_db)):
 
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
-    if cached and (datetime.now(timezone.utc) - cached.fetched_date) < CACHE_TTL:
+    if (
+        cached
+        and (
+            datetime.now(timezone.utc)
+            - cached.fetched_date.replace(tzinfo=timezone.utc)
+        )
+        < CACHE_TTL
+    ):
         async with httpx.AsyncClient(timeout=10.0) as client:
             cover_url = f"https://coverartarchive.org/" f"release-group/{mbid}/front"
             cover_response = await client.head(cover_url)
