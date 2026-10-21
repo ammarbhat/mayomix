@@ -1,11 +1,6 @@
 from fastapi import Depends, HTTPException, status, APIRouter
 from src.models import User, TasteEntry, Review, Connection
-from src.schemas import (
-    UserBase,
-    Classified,
-    EditBase,
-    UserResponse,
-)
+from src.schemas import UserBase, Classified, EditBase, UserResponse, ChangePasswordData
 from src.database import get_db
 from datetime import date
 from typing import Annotated
@@ -166,3 +161,26 @@ def delete_user(
     db.delete(user)
     db.commit()
     return {"message": "User deleted"}
+
+
+@router.patch("/me/password")
+def change_password(
+    data: ChangePasswordData,
+    current: Annotated[User, Depends(get_current_user)],
+    db=Depends(get_db),
+):
+    user = db.scalars(select(User).where(User.username == current.username)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="not found")
+    if verify_password(data.password, user.hash_password):
+        raise HTTPException(
+            status_code=401,
+            detail="incorrect password",
+        )
+    if data.password == data.new_password:
+        raise HTTPException(
+            status_code=409, detail="new password cannot be the same as old password"
+        )
+    user.hash_password = get_password_hash(data.new_password)
+    db.commit()
+    return {"message": "password changed"}

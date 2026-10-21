@@ -124,3 +124,7 @@ class ConnectionResponse(BaseModel):
     name: str
     username: str
     pfp_link: str | None = None
+
+
+class ChangePasswordData(Classified):
+    new_password: str
