@@ -26,8 +26,7 @@ def get_activity(
         )
         .all()
     )
-    if not connections:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+
     ids = {current.id}
     for c in connections:
         ids.add(c.user_id1)
@@ -55,6 +54,4 @@ def get_activity(
                 username=user.username,
             )
         )
-    if not activity:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
     return response

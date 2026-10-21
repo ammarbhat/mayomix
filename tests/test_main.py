@@ -1011,7 +1011,7 @@ def test_get_connection_status_user_not_found(test_db):
 
 def test_activity_not_found():
     response = client.get("/activity?limit=14&offset=0")
-    assert response.status_code == 404
+    assert response.status_code == 200
 
 
 def test_activty(test_db):
