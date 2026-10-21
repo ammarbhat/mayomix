@@ -122,14 +122,14 @@ async def get_album(mbid: str, db=Depends(get_db)):
             if cover_response.status_code == 404:
                 cover_url = None
 
-            db.add(
-                CachedEntity(
-                    mbid=mbid, data=album_meta, fetched_date=datetime.now(timezone.utc)
-                )
-            )
-            db.commit()
-
     if cached:
         cached.data = album_meta
         cached.fetched_date = datetime.now(timezone.utc)
+    else:
+        db.add(
+            CachedEntity(
+                mbid=mbid, data=album_meta, fetched_date=datetime.now(timezone.utc)
+            )
+        )
+        db.commit()
     return {"meta": album_meta, "cover_url": cover_url}
