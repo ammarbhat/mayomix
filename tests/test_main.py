@@ -261,6 +261,30 @@ def test_delete_user_incorrect_password(test_db):
     assert response.status_code == 401
 
 
+def test_change_password():
+    response = client.patch(
+        f"/users/me/password",
+        json={"password": "strings", "new_password": "updated_strings"},
+    )
+    assert response.status_code == 200
+
+
+def test_change_password_unauthorized():
+    response = client.patch(
+        f"/users/me/password",
+        json={"password": "string", "new_password": "updated_strings"},
+    )
+    assert response.status_code == 401
+
+
+def test_change_password_same_password():
+    response = client.patch(
+        f"/users/me/password",
+        json={"password": "strings", "new_password": "strings"},
+    )
+    assert response.status_code == 409
+
+
 def test_add_taste_entry(test_db):
     response = client.post(
         "/users/me/taste?category=top_songs",
