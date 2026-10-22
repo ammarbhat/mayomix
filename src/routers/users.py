@@ -69,9 +69,9 @@ def search_users(
     return results
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserResponse)
 def get_me(current: Annotated[User, Depends(get_current_user)]):
-    user = UserBase(
+    user = UserResponse(
         name=current.name,
         username=current.username,
         bio=current.bio,

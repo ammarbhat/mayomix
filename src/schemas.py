@@ -107,8 +107,10 @@ class UserResponse(BaseModel):
     name: str
     username: str
     bio: str | None = None
+    email: str | None = None
     pfp_link: str | None = None
-    fav_genres: list
+    fav_genres: list[str]
+    create_date: date | None = None
 
 
 class ReviewResponse(ReviewBase):
