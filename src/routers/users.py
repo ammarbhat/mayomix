@@ -172,7 +172,7 @@ def change_password(
     user = db.scalars(select(User).where(User.username == current.username)).first()
     if not user:
         raise HTTPException(status_code=404, detail="not found")
-    if verify_password(data.password, user.hash_password):
+    if not verify_password(data.password, user.hash_password):
         raise HTTPException(
             status_code=401,
             detail="incorrect password",
