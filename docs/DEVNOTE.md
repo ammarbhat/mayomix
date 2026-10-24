@@ -1,0 +1,1 @@
+Mayomix started as a silly thought in my head that I found cool. At that time I was limited by my skills and creativity. After a while I started learning backend technologies and I realized that was doable now. So here it is after months of programming and designing. Mayomix is not just a display of my skills but also my design and creativity. Enjoy!
