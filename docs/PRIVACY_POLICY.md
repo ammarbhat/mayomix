@@ -1,12 +1,12 @@
-# MayoMix Privacy Policy
+# Mayomix Privacy Policy
 
 **Last updated:** 24-10-2026  
 **Contact:** bhatmmr@gmail.com 
 **Service operator:** Ammar
 
-This Privacy Policy explains how MayoMix ("MayoMix", "we", "us", or "our") handles information when you use the MayoMix website, application, and API (the "Service"). It is written for the current features of the MayoMix backend and must be updated if the Service or its infrastructure changes.
+This Privacy Policy explains how Mayomix ("Mayomix", "we", "us", or "our") handles information when you use the Mayomix website, application, and API (the "Service"). It is written for the current features of the Mayomix backend and must be updated if the Service or its infrastructure changes.
 
-MayoMix is currently a music-review and social service. Users can create profiles, publish album reviews and music-taste lists, search for other users, send connection requests, and view activity from accepted connections.
+Mayomix is currently a music-review and social service. Users can create profiles, publish album reviews and music-taste lists, search for other users, send connection requests, and view activity from accepted connections.
 
 ## 1. Information we handle
 
@@ -21,11 +21,11 @@ Depending on how you use the Service, we may process:
 - **Social information:** connection requests, whether a request has been accepted, and connection dates.
 - **Messages sent to us:** information you include if you contact us using the contact details we publish.
 
-MayoMix currently accepts a profile-picture link (URL); the backend does not currently provide an image-upload service.
+Mayomix currently accepts a profile-picture link (URL); the backend does not currently provide an image-upload service.
 
 ### Authentication and security information
 
-When you register, MayoMix stores a password hash generated using Argon2 through its password-hashing library. The password is not intended to be stored as plain text. When you sign in, the Service issues a bearer access token (JWT) that expires according to the configured token lifetime.
+When you register, Mayomix stores a password hash generated using Argon2 through its password-hashing library. The password is not intended to be stored as plain text. When you sign in, the Service issues a bearer access token (JWT) that expires according to the configured token lifetime.
 
 Do not share your access token with other people. The current backend does not implement email verification, password-reset email, or refresh-token functionality.
 
@@ -67,12 +67,12 @@ Do not include information in a public profile, taste list, or review that you d
 
 ## 4. External services
 
-MayoMix currently uses:
+Mayomix currently uses:
 
 - **MusicBrainz** to search for and retrieve music metadata.
 - **Cover Art Archive** to check for and link to album artwork.
 
-When you search for music or request album details, relevant search terms or music identifiers are sent to these services. Album artwork is linked from the Cover Art Archive rather than uploaded to MayoMix by the backend. Those providers operate under their own terms and privacy practices. Review their policies before using their services.
+When you search for music or request album details, relevant search terms or music identifiers are sent to these services. Album artwork is linked from the Cover Art Archive rather than uploaded to Mayomix by the backend. Those providers operate under their own terms and privacy practices. Review their policies before using their services.
 
 The backend also depends on whichever hosting, database, networking, and file or image services are configured for the deployed version. Those providers may process information on our behalf. Their identities and applicable terms should be added here before public launch once the production setup is selected.
 

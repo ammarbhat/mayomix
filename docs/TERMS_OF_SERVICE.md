@@ -1,12 +1,12 @@
-# MayoMix Terms of Service
+# Mayomix Terms of Service
 
 **Last updated:** 24-10-2026  
 **Service operator:** Ammar  
 **Contact:** bhatmmr@gmail.com
 
-These Terms of Service ("Terms") govern your access to and use of MayoMix ("MayoMix", "we", "us", or "our"), including its website, application, and API (the "Service"). By creating an account or using features that require an account, you agree to these Terms. If you do not agree, do not use the Service.
+These Terms of Service ("Terms") govern your access to and use of Mayomix ("Mayomix", "we", "us", or "our"), including its website, application, and API (the "Service"). By creating an account or using features that require an account, you agree to these Terms. If you do not agree, do not use the Service.
 
-MayoMix is a music-review and social service that lets users maintain profiles and music-taste lists, publish album reviews and ratings, and connect with other users.
+Mayomix is a music-review and social service that lets users maintain profiles and music-taste lists, publish album reviews and ratings, and connect with other users.
 
 ## 1. Eligibility and accounts
 
@@ -20,7 +20,7 @@ Usernames must not be used to impersonate another person or mislead other users.
 
 The Service allows you to submit content such as profile information, biographies, favourite genres, music-taste lists, ratings, and reviews ("User Content").
 
-You retain any rights you hold in your original User Content. You grant MayoMix a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, adapt as technically necessary, display, and distribute your User Content only as reasonably needed to operate, provide, secure, and promote the Service. This includes showing your reviews on your profile, on album pages, and in activity feeds, and displaying profile information to other users according to the Service's features.
+You retain any rights you hold in your original User Content. You grant Mayomix a non-exclusive, worldwide, royalty-free licence to host, store, reproduce, adapt as technically necessary, display, and distribute your User Content only as reasonably needed to operate, provide, secure, and promote the Service. This includes showing your reviews on your profile, on album pages, and in activity feeds, and displaying profile information to other users according to the Service's features.
 
 This licence ends when the relevant User Content is deleted from the active Service, except to the extent content remains in backups or logs for a limited period, must be retained by law, or has been independently copied or shared by others. We do not claim ownership of your original reviews.
 
@@ -51,15 +51,15 @@ We may investigate suspected violations and take proportionate action, subject t
 
 ## 5. Reviews and community conduct
 
-Reviews and ratings represent the views of the users who post them, not necessarily the views of MayoMix. You must not knowingly post unlawful content, targeted abuse, threats, spam, or content that violates another person's rights.
+Reviews and ratings represent the views of the users who post them, not necessarily the views of Mayomix. You must not knowingly post unlawful content, targeted abuse, threats, spam, or content that violates another person's rights.
 
 We may remove, restrict, or decline to display content that we reasonably believe violates these Terms or applicable law. We may also restrict or suspend accounts in appropriate circumstances. Where required by law, we will provide notice, reasons, or a means to raise a grievance.
 
 ## 6. Music metadata and artwork
 
-MayoMix uses MusicBrainz for music metadata and Cover Art Archive for album artwork. Music information and artwork may be incomplete, inaccurate, unavailable, or changed by their respective providers.
+Mayomix uses MusicBrainz for music metadata and Cover Art Archive for album artwork. Music information and artwork may be incomplete, inaccurate, unavailable, or changed by their respective providers.
 
-MayoMix does not claim ownership of music, album artwork, artist names, or other third-party material merely because it displays or links to them. Third-party material remains subject to the rights and terms applicable to it. You must respect those rights and the applicable provider terms.
+Mayomix does not claim ownership of music, album artwork, artist names, or other third-party material merely because it displays or links to them. Third-party material remains subject to the rights and terms applicable to it. You must respect those rights and the applicable provider terms.
 
 ## 7. Intellectual-property rights in the Service
 
@@ -93,9 +93,9 @@ Nothing in these Terms excludes or limits a consumer right, warranty, or liabili
 
 ## 13. Limitation of liability
 
-To the maximum extent permitted by applicable law, MayoMix and its operator will not be liable for indirect, incidental, special, consequential, or punitive losses, or for loss of data, profits, goodwill, or business opportunity arising from use of or inability to use the Service.
+To the maximum extent permitted by applicable law, Mayomix and its operator will not be liable for indirect, incidental, special, consequential, or punitive losses, or for loss of data, profits, goodwill, or business opportunity arising from use of or inability to use the Service.
 
-To the maximum extent permitted by applicable law, the aggregate liability of MayoMix and its operator for claims arising from the Service will be limited to the direct loss proven to have been caused by the relevant breach, subject to any mandatory statutory rights and liabilities that cannot be excluded or limited. Nothing in these Terms limits liability where doing so would be unlawful.
+To the maximum extent permitted by applicable law, the aggregate liability of Mayomix and its operator for claims arising from the Service will be limited to the direct loss proven to have been caused by the relevant breach, subject to any mandatory statutory rights and liabilities that cannot be excluded or limited. Nothing in these Terms limits liability where doing so would be unlawful.
 
 ## 14. Indemnity
 
