@@ -60,6 +60,7 @@ def search_users(
     for u in searches:
         results.append(
             UserResponse(
+                id=u.id,
                 username=u.username,
                 pfp_link=u.pfp_link,
                 name=u.name,
@@ -72,7 +73,7 @@ def search_users(
 @router.get("/me", response_model=UserResponse)
 def get_me(current: Annotated[User, Depends(get_current_user)]):
     user = UserResponse(
-        id=user.id,
+        id=current.id,
         name=current.name,
         username=current.username,
         bio=current.bio,
