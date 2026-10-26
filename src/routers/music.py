@@ -4,6 +4,7 @@ from typing import Annotated
 from src.database import get_db
 from typing import Annotated
 import httpx
+from sqlalchemy.exc import IntegrityError
 from pydantic import Field
 from src.dependencies import (
     genre_tag_string,
@@ -125,6 +126,11 @@ async def get_album(mbid: str, db=Depends(get_db)):
     if cached:
         cached.data = album_meta
         cached.fetched_date = datetime.now(timezone.utc)
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=409, detail="conflict")
     else:
         db.add(
             CachedEntity(
