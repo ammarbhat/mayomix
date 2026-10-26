@@ -104,6 +104,7 @@ class CategorySelect(str, Enum):
 
 
 class UserResponse(BaseModel):
+    id: int
     name: str
     username: str
     bio: str | None = None

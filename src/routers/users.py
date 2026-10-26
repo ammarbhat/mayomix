@@ -72,6 +72,7 @@ def search_users(
 @router.get("/me", response_model=UserResponse)
 def get_me(current: Annotated[User, Depends(get_current_user)]):
     user = UserResponse(
+        id=user.id,
         name=current.name,
         username=current.username,
         bio=current.bio,
@@ -91,6 +92,7 @@ def get_user_by_username(username: str, db=Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND, detail="user not found"
         )
     resp = UserResponse(
+        id=user.id,
         name=user.name,
         username=user.username,
         bio=user.bio,
