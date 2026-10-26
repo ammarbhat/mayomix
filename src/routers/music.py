@@ -4,6 +4,7 @@ from typing import Annotated
 from src.database import get_db
 from typing import Annotated
 import httpx
+from httpx import HTTPError
 from sqlalchemy.exc import IntegrityError
 from pydantic import Field
 from src.dependencies import (
@@ -88,54 +89,78 @@ async def get_album(mbid: str, db=Depends(get_db)):
     cached = db.query(CachedEntity).filter(CachedEntity.mbid == mbid).first()
 
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
+    async with httpx.AsyncClient(timeout=10.0) as client:
 
-    if (
-        cached
-        and (
-            datetime.now(timezone.utc)
-            - cached.fetched_date.replace(tzinfo=timezone.utc)
-        )
-        < CACHE_TTL
-    ):
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            cover_url = f"https://coverartarchive.org/" f"release-group/{mbid}/front"
-            cover_response = await client.head(cover_url)
-            if cover_response.status_code == 404:
-                cover_url = None
-        return {"meta": cached.data, "cover_url": cover_url}
-    else:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await rate_limited_get(httpx.AsyncClient(), url, headers=headers)
-
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=response.status_code,
-                    detail="Failed to fetch album from MusicBrainz",
-                )
-
-            album_meta = response.json()
-
-            # Use the release-group MBID directly
-            cover_url = f"https://coverartarchive.org/" f"release-group/{mbid}/front"
-
-            cover_response = await client.head(cover_url)
-
-            if cover_response.status_code == 404:
-                cover_url = None
-
-    if cached:
-        cached.data = album_meta
-        cached.fetched_date = datetime.now(timezone.utc)
-        try:
-            db.commit()
-        except IntegrityError:
-            db.rollback()
-            raise HTTPException(status_code=409, detail="conflict")
-    else:
-        db.add(
-            CachedEntity(
-                mbid=mbid, data=album_meta, fetched_date=datetime.now(timezone.utc)
+        if (
+            cached
+            and (
+                datetime.now(timezone.utc)
+                - cached.fetched_date.replace(tzinfo=timezone.utc)
             )
-        )
-        db.commit()
+            < CACHE_TTL
+        ):
+            cover_url = f"https://coverartarchive.org/" f"release-group/{mbid}/front"
+            try:
+                cover_response = await client.head(cover_url)
+                if cover_response.status_code != 307:
+                    cover_url = None
+            except HTTPError:
+                cover_url = None
+
+            return {"meta": cached.data, "cover_url": cover_url}
+        try:
+            response = await rate_limited_get(client, url, headers=headers)
+            if response.status_code >= 500:
+                if cached:
+                    album_meta = cached.data
+                else:
+                    raise HTTPException(
+                        status_code=response.status_code,
+                        detail="gateway error, try again",
+                    )
+            elif response.status_code != 200:
+                if cached:
+                    album_meta = cached.data
+                else:
+                    raise HTTPException(
+                        status_code=response.status_code,
+                        detail="Failed to fetch album from MusicBrainz",
+                    )
+
+            else:
+                album_meta = response.json()
+            if cached and response.status_code == 200:
+                cached.data = album_meta
+                cached.fetched_date = datetime.now(timezone.utc)
+                try:
+                    db.commit()
+                except IntegrityError:
+                    db.rollback()
+            elif response.status_code == 200:
+                db.add(
+                    CachedEntity(
+                        mbid=mbid,
+                        data=album_meta,
+                        fetched_date=datetime.now(timezone.utc),
+                    )
+                )
+                try:
+                    db.commit()
+                except IntegrityError:
+                    db.rollback()
+        except HTTPError:
+            if cached:
+                album_meta = cached.data
+            else:
+                raise HTTPException(
+                    status_code=504, detail="connection with the external api timed out"
+                )
+        cover_url = f"https://coverartarchive.org/" f"release-group/{mbid}/front"
+        try:
+            cover_response = await client.head(cover_url)
+            if cover_response.status_code != 307:
+                cover_url = None
+        except HTTPError:
+            cover_url = None
+
     return {"meta": album_meta, "cover_url": cover_url}
