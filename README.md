@@ -1,6 +1,6 @@
-# Mayo-Mix API
+# Mayomix API
 
-Mayo-Mix is a backend for a music-review and social app inspired by Letterboxd, built around albums, songs, and personal music taste.
+Mayomix is a backend for a music-review and social app inspired by Letterboxd, built around albums, songs, and personal music taste.
 
 The API lets users create profiles, build curated taste lists, review albums, discover users, connect with other users, and view a review activity feed from accepted connections. Music metadata is provided by MusicBrainz, while album artwork is sourced from the Cover Art Archive.
 
@@ -207,10 +207,8 @@ The activity feed is built from reviews and accepted connections at request time
 - The frontend is not included in this repository.
 - Production deployment and observability configuration are not included yet.
 - Pagination is implemented for reviews and activity but is not standardized across every collection endpoint.
-- Some empty collection or page results return 404 instead of consistently returning an empty list.
 - MusicBrainz search results are returned in the upstream JSON shape rather than a custom normalized response schema.
 - Search results are not currently cached.
-- The album endpoint makes a MusicBrainz request before checking whether cached metadata is fresh, which reduces the benefit of the cache.
 - There is no password-reset, email-verification, refresh-token/revocation, password-change, or profile-image-upload flow yet.
 
 ## Roadmap
