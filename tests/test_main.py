@@ -866,17 +866,24 @@ def test_delete_connection_acceped(test_db):
 
 
 def test_get_connections(test_db):
-    test_con = Connection(
-        user_id1=1, user_id2=67, accepted=True, connect_date=date.today()
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
     )
-    test_con2 = Connection(
-        user_id1=6, user_id2=1, accepted=True, connect_date=date.today()
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    test_con = Connection(
+        user_id1=1, user_id2=test_user.id, accepted=True, connect_date=date.today()
     )
     test_db.add(test_con)
-    test_db.add(test_con2)
     test_db.commit()
     test_db.refresh(test_con)
-    test_db.refresh(test_con2)
     response = client.get("/connections/me")
     assert response.status_code == 200
 

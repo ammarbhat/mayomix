@@ -84,7 +84,7 @@ def delete_request_connection(
     return {"message": "Connection deleted"}
 
 
-@router.get("/me")
+@router.get("/me", response_model=list[ConnectionResponse])
 def get_connections(
     current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
@@ -99,10 +99,35 @@ def get_connections(
         .all()
     )
     respli = connect1 + connect2
-    return respli
+    response = []
+    if len(respli) != 0:
+        for con in respli:
+            if con.user_id1 == current.id:
+                user = db.query(User).filter(User.id == con.user_id2).first()
+                response.append(
+                    ConnectionResponse(
+                        con_id=con.id,
+                        user_id=con.user_id2,
+                        name=user.name,
+                        username=user.username,
+                        pfp_link=user.pfp_link,
+                    )
+                )
+            else:
+                user = db.query(User).filter(User.id == con.user_id1).first()
+                response.append(
+                    ConnectionResponse(
+                        con_id=con.id,
+                        user_id=con.user_id1,
+                        name=user.name,
+                        username=user.username,
+                        pfp_link=user.pfp_link,
+                    )
+                )
+    return response
 
 
-@router.get("/me/pending")
+@router.get("/me/pending", response_model=list[ConnectionResponse])
 def get_pending_connections(
     current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
@@ -127,7 +152,7 @@ def get_pending_connections(
     return response
 
 
-@router.get("/me/sent")
+@router.get("/me/sent", response_model=list[ConnectionResponse])
 def get_sent_connections(
     current: Annotated[User, Depends(get_current_user)], db=Depends(get_db)
 ):
