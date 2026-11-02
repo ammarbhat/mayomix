@@ -9,41 +9,14 @@ from src.models import TasteEntry, User, Review, Connection
 from datetime import date
 from sqlalchemy.pool import StaticPool
 from pwdlib import PasswordHash
+from fastapi import Depends
 
 password_hash = PasswordHash.recommended()
 
 client = TestClient(app)
-engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+engine = create_engine("postgresql://postgres:aa@localhost:1313/postgres")
 Base.metadata.create_all(bind=engine)
 TestingSession = sessionmaker(bind=engine)
-
-
-def override_get_db():
-    db = TestingSession()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def override_get_current_user():
-    return User(
-        id=1,
-        name="amm",
-        username="testusr",
-        email="test@test.com",
-        hash_password=password_hash.hash("string"),
-        create_date=date.today(),
-        fav_genres=["pop", "rock"],
-    )
-
-
-app.dependency_overrides[get_db] = override_get_db
-app.dependency_overrides[get_current_user] = override_get_current_user
 
 
 @pytest.fixture
@@ -57,7 +30,6 @@ def test_db():
 def seed_test_user(setup_and_teardown_db):
     db = TestingSession()
     user = User(
-        id=1,
         name="amm",
         username="testusr",
         email="test@test.com",
@@ -75,6 +47,22 @@ def setup_and_teardown_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+
+
+def override_get_db():
+    db = TestingSession()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def override_get_current_user(db=Depends(get_db)):
+    return db.query(User).filter(User.id == 1).first()
+
+
+app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_current_user] = override_get_current_user
 
 
 def test_root():
@@ -156,6 +144,7 @@ def test_add_user_incomplete_data(test_db):
 def test_get_me():
     response = client.get("/users/me")
     assert response.status_code == 200
+    print(response.json())
 
 
 def test_get_user_by_username():
@@ -751,10 +740,22 @@ def test_delete_review(test_db):
 
 
 def test_delete_review_unauthorized(test_db):
+    user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
     review = Review(
         review_str="string",
         rating=7,
-        user_id=99,
+        user_id=user.id,
         mbid="heyheyhey",
         create_date=date.today(),
     )
