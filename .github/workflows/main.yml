@@ -41,7 +41,7 @@ jobs:
       - name: Create .env for CI
         run: |
           echo "DATABASE_URL=postgresql://postgres:aa@localhost:1313/postgres" >> .env
-          echo "SECRET_KEY=${{secrets.SECRET_KEY}}" >> .env
+          echo "SECRET_KEY=bfdfdd03b53cf6317b37ammaraleem0b4ec6d6df078efa85a3c78c72b9c57db8" >> .env
           echo "ALGORITHM=HS256" >> .env
           echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> .env
           echo "ORIGINS=[\"http://localhost:5173\"]" >> .env
