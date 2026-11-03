@@ -47,5 +47,12 @@ jobs:
           echo "ORIGINS=[\"http://localhost:5173\"]" >> .env
           echo "MUSICBRAINZ_USER_AGENT=mayo-mix-ci/0.1" >> .env
 
+      - name: Run migration upgrade
+        run: uv run alembic upgrade head
+
+      - name: Run alembic check 
+        run: uv run alembic check
+
       - name: Run tests
         run: uv run pytest
+
