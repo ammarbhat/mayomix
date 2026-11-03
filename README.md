@@ -92,6 +92,7 @@ There is no committed `.env.example` file at present. Create a `.env` file in th
 | `ALGORITHM` | JWT signing algorithm |
 | `ORIGINS` | Allowed CORS origins |
 | `MUSICBRAINZ_USER_AGENT` | Identifying User-Agent sent to MusicBrainz |
+| `BETTER_STACK_TOKEN` | Your Better Stack token for logging |
 
 Example configuration:
 
@@ -102,6 +103,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 ALGORITHM=HS256
 ORIGINS=["http://localhost:5173"]
 MUSICBRAINZ_USER_AGENT=Mayo-Mix/0.1 (your-contact@example.com)
+BETTER_STACK_TOKEN=yourtoken
 ```
 
 Replace the example values with your own. Use a long, random secret and never commit real secrets. Set `ORIGINS` to the origin(s) used by your frontend.

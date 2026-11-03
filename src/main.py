@@ -14,9 +14,10 @@ from src.routers import (
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from src.config import settings
+from src.logger import logger
 
 app = FastAPI()
-
+logger.info("Starting API...")
 origins = settings.ORIGINS
 
 app.add_middleware(

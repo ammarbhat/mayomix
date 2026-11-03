@@ -8,6 +8,7 @@ class EnvSettings(BaseSettings):
     ALGORITHM: str
     ORIGINS: list[str]
     MUSICBRAINZ_USER_AGENT: str
+    BETTER_STACK_TOKEN: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
