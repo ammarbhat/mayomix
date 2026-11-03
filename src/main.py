@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from src.config import settings
 from src.logger import logger
+import time
 
 app = FastAPI()
 logger.info("Starting API...")
@@ -27,6 +28,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_headers_and_logging(request: Request, call_next):
+    start_time = time.perf_counter()
+    response = await call_next(request)
+    process_time = time.perf_counter() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    log_dict = {
+        "url": request.url.path,
+        "method": request.method,
+        "process_time": process_time,
+    }
+    logger.info(log_dict, extra=log_dict)
+    return response
 
 
 @app.exception_handler(IntegrityError)
