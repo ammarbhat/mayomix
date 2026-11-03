@@ -47,6 +47,7 @@ jobs:
           echo "ORIGINS=[\"http://localhost:5173\"]" >> .env
           echo "MUSICBRAINZ_USER_AGENT=mayo-mix-ci/0.1" >> .env
           echo "BETTER_STACK_TOKEN=sdhufsdhfsdfusdf" >> .env
+          echo "BETTER_STACK_host=http://sdhufsdhfsdfusdf" >> .env
 
       - name: Run migration upgrade
         run: uv run alembic upgrade head

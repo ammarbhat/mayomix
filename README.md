@@ -93,6 +93,7 @@ There is no committed `.env.example` file at present. Create a `.env` file in th
 | `ORIGINS` | Allowed CORS origins |
 | `MUSICBRAINZ_USER_AGENT` | Identifying User-Agent sent to MusicBrainz |
 | `BETTER_STACK_TOKEN` | Your Better Stack token for logging |
+| `BETTER_STACK_HOST` | Your Better Stack host for logging |
 
 Example configuration:
 
@@ -104,6 +105,7 @@ ALGORITHM=HS256
 ORIGINS=["http://localhost:5173"]
 MUSICBRAINZ_USER_AGENT=Mayo-Mix/0.1 (your-contact@example.com)
 BETTER_STACK_TOKEN=yourtoken
+BETTER_STACK_host=yourhost
 ```
 
 Replace the example values with your own. Use a long, random secret and never commit real secrets. Set `ORIGINS` to the origin(s) used by your frontend.
