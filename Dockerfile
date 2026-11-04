@@ -12,11 +12,12 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev --no-install-project
 
 COPY src ./src
-
+COPY alembic.ini ./
+COPY alembic ./alembic
 RUN useradd --create-home appuser \
     && chown -R appuser:appuser /app
 
 USER appuser
 
 
-CMD ["sh", "-c", "python -m uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+CMD ["sh", "-c", "alembic upgrade head && python -m uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
