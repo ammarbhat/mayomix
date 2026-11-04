@@ -19,4 +19,4 @@ RUN useradd --create-home appuser \
 USER appuser
 
 
-CMD ["sh", "-c", "fastapi run src/main.py --host 0.0.0.0 --port ${PORT:-1000}"]
+CMD ["sh", "-c", "python -m uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-10000}"]

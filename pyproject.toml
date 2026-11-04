@@ -16,6 +16,7 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "requests>=2.34.2",
     "sqlalchemy>=2.0.54",
+    "uvicorn[standard]>=0.53.0",
 ]
 [tool.fastapi]
 entrypoint = "src.main:app"
