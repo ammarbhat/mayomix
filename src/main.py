@@ -44,8 +44,11 @@ async def add_headers_and_logging(request: Request, call_next):
         "method": request.method,
         "process_time": process_time,
         "request_id": request_id,
+        "status_code": response.status_code,
     }
-    if request.url.path == "/health" and response.status_code == 503:
+    if process_time > 4:
+        logger.warning(log_dict, extra=log_dict)
+    elif request.url.path == "/health" and response.status_code == 503:
         logger.error(log_dict, extra=log_dict)
     else:
         logger.info(log_dict, extra=log_dict)
@@ -54,10 +57,7 @@ async def add_headers_and_logging(request: Request, call_next):
 
 @app.exception_handler(IntegrityError)
 async def integrity_exception_handler(request: Request, exc: IntegrityError):
-    log_dict = {
-        "url": request.url.path,
-        "method": request.method,
-    }
+    log_dict = {"url": request.url.path, "method": request.method, "status_code": 409}
     logger.error(log_dict, extra=log_dict)
     return JSONResponse(
         status_code=409, content={"detail": "This conflicts with existing data."}
@@ -66,10 +66,7 @@ async def integrity_exception_handler(request: Request, exc: IntegrityError):
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    log_dict = {
-        "url": request.url.path,
-        "method": request.method,
-    }
+    log_dict = {"url": request.url.path, "method": request.method, "status_code": 500}
     logger.error(log_dict, extra=log_dict)
     return JSONResponse(
         status_code=500, content={"detail": "Something went wrong. Please try again."}
