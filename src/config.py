@@ -6,7 +6,7 @@ class EnvSettings(BaseSettings):
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     ALGORITHM: str
-    ORIGINS: list[str]
+    ORIGINS: str
     MUSICBRAINZ_USER_AGENT: str
     BETTER_STACK_TOKEN: str
     BETTER_STACK_HOST: str
