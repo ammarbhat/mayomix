@@ -1,0 +1,34 @@
+
+services:
+  app:
+    # Build configuration for the "app" service:
+    # - 'context: .' tells Docker to use the current directory as the build context
+    # - 'dockerfile: Dockerfile' specifies the file to use for building the image
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # This sets the default working directory inside the container
+    working_dir: /app
+
+    # Mounts the local "app" directory into the container so code changes are reflected without rebuild
+    volumes:
+      - ./app:/app/app
+
+    # Maps the container port 8000 to the host machine port defined by APP_PORT
+    # If APP_PORT is not set, it defaults to 8000
+    ports:
+      - "${APP_PORT:-8000}:8000"
+
+    # Passes the DATABASE_URL environment variable to the container
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ORIGINS=${ORIGINS}
+      - ALGORITHM=${ALGORITHM}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+      - MUSICBRAINZ_USER_AGENT=${MUSICBRAINZ_USER_AGENT}
+      - BETTER_STACK_TOKEN=${BETTER_STACK_TOKEN}
+      - BETTER_STACK_HOST=${BETTER_STACK_HOST}
+
+  
