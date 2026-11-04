@@ -13,5 +13,10 @@ RUN uv sync --locked --no-dev --no-install-project
 
 COPY src ./src
 
+RUN useradd --create-home appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
 
 CMD ["sh", "-c", "fastapi run src/main.py --host 0.0.0.0 --port ${PORT:-1000}"]
