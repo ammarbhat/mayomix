@@ -166,7 +166,7 @@ async def get_album(mbid: str, db=Depends(get_db)):
     return {"meta": album_meta, "cover_url": cover_url}
 
 
-@router.get("/albums/{album_mbid}/traclist")
+@router.get("/albums/{album_mbid}/tracklist")
 async def get_tracklist(album_mbid: str):
     url = f"https://musicbrainz.org/ws/2/release/{album_mbid}?inc=recordings&fmt=json"
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
