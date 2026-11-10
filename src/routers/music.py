@@ -164,3 +164,18 @@ async def get_album(mbid: str, db=Depends(get_db)):
             cover_url = None
 
     return {"meta": album_meta, "cover_url": cover_url}
+
+
+@router.get("/albums/{album_mbid}/traclist")
+async def get_tracklist(album_mbid: str):
+    url = f"https://musicbrainz.org/ws/2/release/{album_mbid}?inc=recordings&fmt=json"
+    headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
+    response = await rate_limited_get(httpx.AsyncClient(), url=url, headers=headers)
+    if response.status_code == 200:
+
+        media = response.json()["media"]
+        for items in media:
+            return items.get("tracks")
+
+    else:
+        return []
