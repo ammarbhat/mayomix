@@ -84,7 +84,7 @@ async def search_songs(
 async def get_album(mbid: str, db=Depends(get_db)):
     url = (
         f"https://musicbrainz.org/ws/2/release-group/"
-        f"{mbid}?inc=genres+releases&fmt=json"
+        f"{mbid}?inc=artists+genres+releases&fmt=json"
     )
     cached = db.query(CachedEntity).filter(CachedEntity.mbid == mbid).first()
 
