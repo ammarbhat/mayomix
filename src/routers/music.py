@@ -172,10 +172,7 @@ async def get_tracklist(album_mbid: str):
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
     response = await rate_limited_get(httpx.AsyncClient(), url=url, headers=headers)
     if response.status_code == 200:
-
-        media = response.json()["media"]
-        for items in media:
-            return items.get("tracks")
+        return response.json()
 
     else:
         return []
