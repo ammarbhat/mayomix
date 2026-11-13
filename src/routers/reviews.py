@@ -1,10 +1,11 @@
 from fastapi import Depends, HTTPException, status, APIRouter
 from src.models import User, Review
-from src.schemas import ReviewBase, EditReview, ReviewResponse
+from src.schemas import ReviewBase, EditReview, ReviewResponse, TopRatedAlbumResponse
 from datetime import date
 from typing import Annotated
 from src.database import get_db
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func, select
 from pydantic import Field
 from src.dependencies import (
     get_current_user,
@@ -167,3 +168,36 @@ def delete_review(
     db.delete(review)
     db.commit()
     return {"message": "Review deleted"}
+
+
+@router.get("/top-rated/albums", response_model=list[TopRatedAlbumResponse])
+def get_top_rated_albums(
+    current: Annotated[User, Depends(get_current_user)],
+    limit: Annotated[int, Field(default=13, gt=12, lt=30)],
+    offset: Annotated[int, Field(default=0, ge=0)],
+    db=Depends(get_db),
+):
+    stmt = (
+        select(
+            Review.mbid,
+            func.avg(Review.rating).label("avg_rating"),
+            func.count(Review.id).label("review_count"),
+        )
+        .group_by(Review.mbid)
+        .having(func.count(Review.id) >= 1)
+        .order_by(func.avg(Review.rating).desc(), func.count(Review.id).desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows = db.execute(stmt).all()
+
+    response = []
+    for row in rows:
+        response.append(
+            TopRatedAlbumResponse(
+                mbid=str(row.mbid),
+                avg_rating=int(row.avg_rating),
+                count=int(row.review_count),
+            )
+        )
+    return response

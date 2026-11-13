@@ -131,3 +131,9 @@ class ConnectionResponse(BaseModel):
 
 class ChangePasswordData(Classified):
     new_password: str
+
+
+class TopRatedAlbumResponse(BaseModel):
+    mbid: str
+    avg_rating: int
+    count: int

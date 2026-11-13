@@ -1062,3 +1062,8 @@ def test_activty(test_db):
     test_db.commit()
     response = client.get("/activity?limit=14&offset=0")
     assert response.status_code == 200
+
+
+def test_get_top_rated_albums():
+    response = client.get("/top-rated/albums?limit=14&offset=0")
+    assert response.status_code == 200
