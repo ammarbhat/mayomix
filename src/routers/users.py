@@ -51,6 +51,7 @@ def add_user(user: UserBase, pwd: Classified, db=Depends(get_db)):
 @router.get("/search")
 def search_users(
     username: str,
+    current: Annotated[User, Depends(get_current_user)],
     db=Depends(get_db),
 ):
     results = []
@@ -58,15 +59,18 @@ def search_users(
         select(User).where(User.username.contains(username)).limit(20)
     ).all()
     for u in searches:
-        results.append(
-            UserResponse(
-                id=u.id,
-                username=u.username,
-                pfp_link=u.pfp_link,
-                name=u.name,
-                fav_genres=u.fav_genres,
+        if u.username == current.username or u.username == "me":
+            continue
+        else:
+            results.append(
+                UserResponse(
+                    id=u.id,
+                    username=u.username,
+                    pfp_link=u.pfp_link,
+                    name=u.name,
+                    fav_genres=u.fav_genres,
+                )
             )
-        )
     return results
 
 
