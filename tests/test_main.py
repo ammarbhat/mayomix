@@ -163,8 +163,20 @@ def test_search_users_not_found():
     assert response.json() == []
 
 
-def test_search_users():
-    response = client.get("/users/search?username=testusr")
+def test_search_users(test_db):
+    test_user = User(
+        name="test",
+        username="anythings",
+        bio="heyyy",
+        email="test@mail.com",
+        hash_password="blahblah",
+        create_date=date.today(),
+        fav_genres=["rock"],
+    )
+    test_db.add(test_user)
+    test_db.commit()
+    test_db.refresh(test_user)
+    response = client.get(f"/users/search?username={test_user.username}")
     assert response.status_code == 200
     assert len(response.json()) == 1
 
