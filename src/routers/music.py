@@ -176,3 +176,23 @@ async def get_tracklist(album_mbid: str):
 
     else:
         return []
+
+
+@router.get("/recordings/{mbid}")
+async def get_song(mbid: str):
+    url = f"https://musicbrainz.org/ws/2/release/{mbid}?inc=artists+release-groups+genres&fmt=json"
+    cover_url = f"https://coverartarchive.org/" f"release/{mbid}/front"
+    headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await rate_limited_get(client, url, headers=headers)
+        song_meta = response.json()
+        if response.status_code == 200:
+            cover_response = await client.head(cover_url)
+            if cover_response.status_code != 307:
+                return {"meta": song_meta, "cover_url": None}
+            else:
+                return {"meta": song_meta, "cover_url": cover_url}
+        else:
+            raise HTTPException(
+                status_code=504, detail="connection with the external api timed out"
+            )
