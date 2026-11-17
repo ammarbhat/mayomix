@@ -23,6 +23,21 @@ musicbrainz_semaphore = asyncio.Semaphore(1)
 CACHE_TTL = timedelta(days=13)
 
 
+def pick_release(recording: dict) -> dict | None:
+    releases = recording.get("releases") or []
+
+    def rank(rel: dict):
+        rg = rel.get("release-group") or {}
+        is_official = rel.get("status") == "Official"
+        is_plain = rg.get("primary-type") in ("Album", "Single") and not rg.get(
+            "secondary-types"
+        )
+        date = rel.get("date") or "9999"  # missing dates sort last
+        return (not is_official, not is_plain, date)
+
+    return min(releases, key=rank, default=None)
+
+
 async def rate_limited_get(client: httpx.AsyncClient, url: str, **kwargs):
     async with musicbrainz_semaphore:
         start = time.monotonic()
@@ -180,19 +195,24 @@ async def get_tracklist(album_mbid: str):
 
 @router.get("/recordings/{mbid}")
 async def get_song(mbid: str):
-    url = f"https://musicbrainz.org/ws/2/release/{mbid}?inc=artists+release-groups+genres&fmt=json"
-    cover_url = f"https://coverartarchive.org/" f"release/{mbid}/front"
+    url = f"https://musicbrainz.org/ws/2/recording/{mbid}?inc=artists+release-groups+releases+genres&fmt=json"
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
     async with httpx.AsyncClient(timeout=10.0) as client:
         response = await rate_limited_get(client, url, headers=headers)
         song_meta = response.json()
         if response.status_code == 200:
+            release = pick_release(song_meta)
+            release_mbid = release["id"] if release else None
+            rg_id = (release.get("release-group") or {}).get("id") if release else None
+            cover_url = (
+                f"https://coverartarchive.org/release-group/{rg_id}/front"
+                if rg_id
+                else None
+            )
             cover_response = await client.head(cover_url)
             if cover_response.status_code != 307:
                 return {"meta": song_meta, "cover_url": None}
             else:
                 return {"meta": song_meta, "cover_url": cover_url}
         else:
-            raise HTTPException(
-                status_code=504, detail="connection with the external api timed out"
-            )
+            return response.json()
