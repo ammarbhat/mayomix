@@ -66,7 +66,10 @@ async def search_albums_endpoint(
     response = await rate_limited_get(
         httpx.AsyncClient(), url, params=params, headers=headers
     )
-    return response.json()
+    if response.status_code != 200:
+        raise HTTPException(status_code=503, detail="external api timeout")
+    else:
+        return response.json()
 
 
 @router.get("/search/artists")
@@ -81,7 +84,10 @@ async def search_artits(
     response = await rate_limited_get(
         httpx.AsyncClient(), url, params=params, headers=headers
     )
-    return response.json()
+    if response.status_code != 200:
+        raise HTTPException(status_code=503, detail="external api timeout")
+    else:
+        return response.json()
 
 
 @router.get("/search/songs")
@@ -97,7 +103,10 @@ async def search_songs(
     response = await rate_limited_get(
         httpx.AsyncClient(), url, params=params, headers=headers
     )
-    return response.json()
+    if response.status_code != 200:
+        raise HTTPException(status_code=503, detail="external api timeout")
+    else:
+        return response.json()
 
 
 @router.get("/albums/{mbid}")
