@@ -53,13 +53,14 @@ async def search_albums_endpoint(
     query: str,
     current: Annotated[User, Depends(get_current_user)],
     limit: Annotated[int, Field(default=15, lt=25, ge=1)],
+    offset: Annotated[int, Field(default=0, ge=0)],
     db=Depends(get_db),
 ):
     # user = db.query(User).filter(User.username == current.username).first()
     # genre_string = genre_tag_string(user.fav_genres)
     mod_query = f'releasegroup:"{query}" AND primarytype:album'
     url = "https://musicbrainz.org/ws/2/release-group/"
-    params = {"query": mod_query, "fmt": "json", "limit": limit}
+    params = {"query": mod_query, "fmt": "json", "limit": limit, "offset": offset}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
 
     response = await rate_limited_get(
@@ -70,10 +71,12 @@ async def search_albums_endpoint(
 
 @router.get("/search/artists")
 async def search_artits(
-    query: str, limit: Annotated[int, Field(default=6, lt=25, ge=1)]
+    query: str,
+    limit: Annotated[int, Field(default=6, lt=25, ge=1)],
+    offset: Annotated[int, Field(default=0, ge=0)],
 ):
     url = "https://musicbrainz.org/ws/2/artist/"
-    params = {"query": query, "fmt": "json", "limit": limit}
+    params = {"query": query, "fmt": "json", "limit": limit, "offset": offset}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
     response = await rate_limited_get(
         httpx.AsyncClient(), url, params=params, headers=headers
@@ -83,11 +86,13 @@ async def search_artits(
 
 @router.get("/search/songs")
 async def search_songs(
-    query: str, limit: Annotated[int, Field(default=10, lt=25, ge=1)]
+    query: str,
+    limit: Annotated[int, Field(default=10, lt=25, ge=1)],
+    offset: Annotated[int, Field(default=0, ge=0)],
 ):
     mod_query = f'recording:"{query}"'
     url = "https://musicbrainz.org/ws/2/recording/"
-    params = {"query": mod_query, "fmt": "json", "limit": limit}
+    params = {"query": mod_query, "fmt": "json", "limit": limit, "offset": offset}
     headers = {"User-Agent": settings.MUSICBRAINZ_USER_AGENT}
     response = await rate_limited_get(
         httpx.AsyncClient(), url, params=params, headers=headers
